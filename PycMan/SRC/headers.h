@@ -15,6 +15,7 @@ using namespace std;
 #include <fstream>
 #include <sstream>
 #include <cmath>
+#include <functional>
 
 // Moje w³asne
 #include "CScreen.h"

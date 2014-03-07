@@ -69,5 +69,6 @@ private:
 	void LoadNextMap();
 
 	void PrepareGame(sf::RenderWindow & App);
+
 };
 #endif

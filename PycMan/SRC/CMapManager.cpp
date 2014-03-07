@@ -17,14 +17,20 @@ CMapManager* CMapManager::GetInstance()
 CMapManager::CMapManager()
 {
 	FoodCount = 0;
+	m_renderTextureWalls.create(1000, 1000);
 }
 
 void CMapManager::DrawMap(sf::RenderWindow & App)
 {
-	for(unsigned int i=0; i< m_Walls.size(); i++)
+	/*for(unsigned int i=0; i< m_Walls.size(); i++)
 	{
 		App.draw( m_Walls[i] );
-	}
+	}*/
+
+	//rysuje teksture œcian
+	App.draw(m_spriteWalls);
+
+	// rysuje ca³e jedzenie
 	for(unsigned int i=0; i< m_Foods.size(); i++)
 	{
 		App.draw( m_Foods[i].shape );
@@ -37,6 +43,8 @@ void CMapManager::LoadMap(const string filepath)
 	m_vmap.clear();
 	m_Foods.clear();
 	m_Walls.clear();
+	m_renderTextureWalls.clear();
+
 
 	ifstream plik(filepath.c_str());
 	string _tmp;
@@ -95,6 +103,7 @@ void CMapManager::LoadMap(const string filepath)
 					kafel.setPosition(center.x-7, center.y);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 
 					if( j>0 && m_vmap[i][j-1] == '_')
 					{
@@ -103,6 +112,7 @@ void CMapManager::LoadMap(const string filepath)
 						kafel.setPosition(center.x-7, center.y);
 						kafel.setFillColor(sf::Color::Red);
 						m_Walls.push_back(kafel);
+						m_renderTextureWalls.draw(kafel);
 					
 					}
 					break;
@@ -114,6 +124,7 @@ void CMapManager::LoadMap(const string filepath)
 					kafel.setPosition(center.x, center.y-7);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 					break;
 				}
 				case '1':
@@ -123,12 +134,14 @@ void CMapManager::LoadMap(const string filepath)
 					kafel.setPosition(center.x, center.y);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 
 					//kafel = sf::Shape::Line(center.x-1, center.y, center.x+8 , center.y, 3.f, sf::Color(255,0,0,255));
 					kafel.setSize(sf::Vector2f(9,3));
 					kafel.setPosition(center.x, center.y);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 					break;
 				}
 				case '2':
@@ -138,12 +151,14 @@ void CMapManager::LoadMap(const string filepath)
 					kafel.setPosition(center.x, center.y-8);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 
 					//kafel = sf::Shape::Line(center.x-1, center.y, center.x+8 , center.y, 3.f, sf::Color(255,0,0,255));
 					kafel.setSize(sf::Vector2f(9,3));
 					kafel.setPosition(center.x, center.y);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 					break;
 				}
 				case '4':
@@ -154,12 +169,14 @@ void CMapManager::LoadMap(const string filepath)
 					kafel.setPosition(center.x, center.y);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 				
 					//kafel = sf::Shape::Line(center.x -8, center.y, center.x+1, center.y , 3.f, sf::Color(255,0,0,255));
 					kafel.setSize(sf::Vector2f(9,3));
 					kafel.setPosition(center.x-7, center.y);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 					break;
 				}
 				case '3':
@@ -170,12 +187,14 @@ void CMapManager::LoadMap(const string filepath)
 					kafel.setPosition(center.x, center.y-7);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 				
 					//kafel = sf::Shape::Line(center.x -8, center.y, center.x+1, center.y , 3.f, sf::Color(255,0,0,255));
 					kafel.setSize(sf::Vector2f(9,3));
 					kafel.setPosition(center.x-7, center.y);
 					kafel.setFillColor(sf::Color::Red);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 					break;
 				}
 				case '#':
@@ -186,6 +205,7 @@ void CMapManager::LoadMap(const string filepath)
 					kafel.setPosition(center.x-15, center.y);
 					kafel.setFillColor(sf::Color::White);
 					m_Walls.push_back(kafel);
+					m_renderTextureWalls.draw(kafel);
 					break;
 				}
 				case 'P':
@@ -224,7 +244,14 @@ void CMapManager::LoadMap(const string filepath)
 		}// end for
 		
 	}// end for
+
+
 	FoodCount = (unsigned int)(m_Foods.size());
+	m_renderTextureWalls.display();
+	m_spriteWalls.setTexture( m_renderTextureWalls.getTexture() );
+	
+
+
 }
 
 deque<sf::RectangleShape> & CMapManager::GetWallShapes()

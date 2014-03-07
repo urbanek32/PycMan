@@ -464,6 +464,7 @@ void CGame::m_AddScore()
 			}
 
 			sort(m_vscores.begin(), m_vscores.end(), std::greater<unsigned long long int>());
+			
 			plik.close();
 
 			ofstream plik2("DATA/scores.txt");

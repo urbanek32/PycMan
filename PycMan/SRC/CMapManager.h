@@ -36,5 +36,12 @@ private:
 
 	sf::Vector2f center;
 
+	
+	// tekstura zawiera zrenderowane sciany
+	sf::RenderTexture m_renderTextureWalls;
+
+	// sprite do trzymania tekstury œcian
+	sf::Sprite m_spriteWalls;
+
 };
 #endif
