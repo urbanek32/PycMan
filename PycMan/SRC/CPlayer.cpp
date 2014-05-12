@@ -34,16 +34,26 @@ void CPlayer::RestartPosition()
 	m_Sprite.setPosition(m_StartPosition);
 }
 
-void CPlayer::Update(sf::RenderWindow & App, sf::Image & ScreenCapture, float deltaTime)
+void CPlayer::Update(sf::RenderWindow & App, sf::Image & ScreenCapture, float deltaTime, bool isWindowActive)
 {
 	if(gameState == Play)
 	{
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) { m_NowyKierunek = LEWO; }
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) { m_NowyKierunek = PRAWO; }
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) { m_NowyKierunek = GORA; }
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) { m_NowyKierunek = DOL; }
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) { if(m_Stamina>0.f) { m_Stamina-=1.f; m_Speed = 100.f; } else m_Speed = 60.f; } else {m_Speed = 60.f;}
-
+		if (isWindowActive)
+		{
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) { m_NowyKierunek = LEWO; }
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) { m_NowyKierunek = PRAWO; }
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) { m_NowyKierunek = GORA; }
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) { m_NowyKierunek = DOL; }
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) 
+			{ 
+				if (m_Stamina > 0.f) 
+				{ 
+					m_Stamina -= 1.f; m_Speed = 100.f; 
+				}
+				else m_Speed = 60.f; 
+			}
+			else { m_Speed = 60.f; }
+		}
 
 		if(m_regenclock.getElapsedTime().asSeconds() > 1.f)
 		{

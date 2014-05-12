@@ -15,7 +15,7 @@ class CPlayer
 public:
 	CPlayer();
 
-	virtual void Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float deltaTime);
+	virtual void Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float deltaTime, bool isWindowActive);
 
 	sf::Sprite & GetSprite();
 

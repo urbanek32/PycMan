@@ -70,5 +70,8 @@ private:
 
 	void PrepareGame(sf::RenderWindow & App);
 
+	// czy okno z gra jest aktywne
+	bool m_isActive;
+
 };
 #endif

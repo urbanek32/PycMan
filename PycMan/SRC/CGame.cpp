@@ -107,6 +107,16 @@ int CGame::Run(sf::RenderWindow & App)
 				return (-1);
 			}
 
+			if (m_Event.type == sf::Event::GainedFocus)
+			{
+				m_isActive = true;
+			}
+
+			if (m_Event.type == sf::Event::LostFocus)
+			{
+				m_isActive = false;
+			}
+
 			if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F12)
 			{
 				m_LevelNumer++;
@@ -200,7 +210,7 @@ int CGame::Run(sf::RenderWindow & App)
 			m_CaptureScreen(App);
 
 		// Obsluga gracza
-		m_Player->Update(App, m_ScreenCapture, m_currentTime);
+		m_Player->Update(App, m_ScreenCapture, m_currentTime, m_isActive);
 
 		// Obsluga przeciwnika
 		UpdateEnemies(App,m_ScreenCapture, m_currentTime);
