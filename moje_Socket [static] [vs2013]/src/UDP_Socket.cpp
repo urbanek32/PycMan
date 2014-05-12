@@ -95,4 +95,21 @@ namespace moje
 		this->m_errorWSAReporting = enable;
 	}
 
+	UInt16 UDP_Socket::getLocalPort() const
+	{
+		if (getHandle() != priv::SocketImpl::invalidSocket())
+		{
+			// weŸ informacje o lokalnym sokecie
+			sockaddr_in address;
+			priv::SocketImpl::AddrLength size = sizeof(address);
+			if (getsockname(getHandle(), reinterpret_cast<sockaddr*>(&address), &size) != -1)
+			{
+				return ntohs(address.sin_port);
+			}
+		}
+
+		// Nie uda³o siê wykryæ portu
+		return 0;
+	}
+
 }

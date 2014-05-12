@@ -82,4 +82,24 @@ namespace moje
 	{
 		return ntohl(m_address);
 	}
+
+	bool IPAddress::operator ==(const IPAddress& left)
+	{
+		return left.toInteger() == this->toInteger();
+	}
+
+	bool IPAddress::operator !=(const IPAddress& left)
+	{
+		return !(left.toInteger() == this->toInteger());
+	}
+
+	bool IPAddress::operator <(const IPAddress& left)
+	{
+		return left.toInteger() < this->toInteger();
+	}
+
+	bool IPAddress::operator >(const IPAddress& left)
+	{
+		return !(left.toInteger() < this->toInteger());
+	}
 }

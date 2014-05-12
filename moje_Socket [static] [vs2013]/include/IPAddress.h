@@ -31,6 +31,11 @@ namespace moje
 		static const IPAddress LocalHost; // reprezentacja samego siebie
 		static const IPAddress Broadcast; // do wysy³ania udp do wszystkich w sieci
 
+		bool operator ==(const IPAddress& left);
+		bool operator !=(const IPAddress& left);
+		bool operator <(const IPAddress& left);
+		bool operator >(const IPAddress& left);
+
 	private:
 		UInt32 m_address; // adres trzymany jako 32bitowy int
 	};
