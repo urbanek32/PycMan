@@ -44,16 +44,9 @@ void CPlayer::Update(sf::RenderWindow & App, sf::Image & ScreenCapture, float de
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) { m_NowyKierunek = PRAWO; }
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) { m_NowyKierunek = GORA; }
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) { m_NowyKierunek = DOL; }
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) 
-			{ 
-				if (m_Stamina > 0.f) 
-				{ 
-					m_Stamina -= 1.f; m_Speed = 100.f; 
-				}
-				else m_Speed = 60.f; 
-			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) { if (m_Stamina>0.f) { m_Stamina -= 1.f; m_Speed = 100.f; } else m_Speed = 60.f; }
 			else { m_Speed = 60.f; }
-		}
+		}		
 
 		if(m_regenclock.getElapsedTime().asSeconds() > 1.f)
 		{
@@ -63,8 +56,6 @@ void CPlayer::Update(sf::RenderWindow & App, sf::Image & ScreenCapture, float de
 		}
 		if(m_Stamina > 100.f) m_Stamina = 100.f;
 		if(m_Stamina < 0.f) m_Stamina = 0.f;
-	
-
 
 		Go(ScreenCapture, deltaTime);
 

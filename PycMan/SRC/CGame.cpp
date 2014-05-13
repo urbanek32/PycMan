@@ -11,7 +11,7 @@ CGame::CGame()
 	m_lastTime = 0;
 	m_currentTime = 0;
 	m_count = 5;
-	
+
 	gameState = Prepare;
 
 	m_LevelNumer = 1;
@@ -76,8 +76,7 @@ CGame::CGame()
 
 int CGame::Run(sf::RenderWindow & App)
 {
-	m_Running = true;
-
+	m_Running = true;	
 	while( m_Running )
 	{
 		App.clear();
@@ -98,15 +97,10 @@ int CGame::Run(sf::RenderWindow & App)
 		if( !m_Inited )
 			m_Init();
 
+		
 		while(App.pollEvent(m_Event))
 		{
-			if(m_Event.type == sf::Event::Closed)
-			{
-				// Zamknij aplikacje
-				m_Running = false;
-				return (-1);
-			}
-
+			
 			if (m_Event.type == sf::Event::GainedFocus)
 			{
 				m_isActive = true;
@@ -117,15 +111,22 @@ int CGame::Run(sf::RenderWindow & App)
 				m_isActive = false;
 			}
 
-			if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F12)
+			if (m_Event.type == sf::Event::Closed)
+			{
+				// Zamknij aplikacje
+				m_Running = false;
+				return (-1);
+			}
+
+			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F12)
 			{
 				m_LevelNumer++;
 
-				if(m_LevelNumer > 3)
+				if (m_LevelNumer > 3)
 					m_LevelNumer = 1;
 
 				std::ostringstream style;
-				style<<"DATA/level"<<m_LevelNumer<<".txt";
+				style << "DATA/level" << m_LevelNumer << ".txt";
 				m_MapMng->LoadMap(style.str());
 
 				m_Enemies[0].SetStartPosition(BlinkyPosition);
@@ -139,59 +140,59 @@ int CGame::Run(sf::RenderWindow & App)
 				gameState = Prepare;
 			}
 
-			if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F11)
+			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F11)
 			{
 				RestartPositions();
 			}
 
-			if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::Escape)
+			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::Escape)
 			{
-				if(gameState == Play)
+				if (gameState == Play)
 					gameState = Quit;
-				else if(gameState == Quit)
-					gameState = Play;	
+				else if (gameState == Quit)
+					gameState = Play;
 			}
 
-			if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::P)
+			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::P)
 			{
-				if(gameState == Play)
+				if (gameState == Play)
 					gameState = Pauza;
-				else if(gameState == Pauza)
-					gameState = Play;	
+				else if (gameState == Pauza)
+					gameState = Play;
 			}
 
-			if(gameState == GameOver)
+			if (gameState == GameOver)
 			{
-				if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
+				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
 				{
 					// zakoñcz grê
 					return (-1);
 				}
 
-				if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::N)
+				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::N)
 				{
 					// rozpocznij od nowa
 					RestartGame(true);
 				}
 			}
 
-			if(gameState == Quit)
+			if (gameState == Quit)
 			{
-				if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
+				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
 				{
 					// wróæ do menu
 					RestartGame(true);
 					return (0);
-					
+
 				}
 
-				if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::N)
+				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::N)
 				{
 					gameState = Play;
 				}
-			}
-
-
+			}			
+			
+			
 		} // koniec pêtli eventów
 
 		// Jak mamy 0 ¿yæ to GameOver
@@ -275,6 +276,7 @@ void CGame::m_Init()
 	m_Enemies.push_back(*duch3);
 	CEnemyGhost *duch4 = new CEnemyGhost("DATA/PinkyALL.bmp", PinkyPosition);
 	m_Enemies.push_back(*duch4);
+
 
 	m_overShape.setSize(sf::Vector2f(200,150));
 	m_overShape.setPosition(120,220);

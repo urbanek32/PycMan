@@ -53,8 +53,8 @@ int CMainMenu::Run(sf::RenderWindow & App)
 
 			if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::P)
 			{
-				// Rozpocznij grê
-				return (1);
+				// PrzejdŸ do poczekalni
+				return (3);
 			}
 
 			if(m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::H)

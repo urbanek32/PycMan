@@ -3,6 +3,7 @@
 
 #include "headers.h"
 
+
 enum GameState{
 	Pauza, Quit, Play, GameOver, Prepare
 };
@@ -17,7 +18,6 @@ public:
 
 	virtual int Run(sf::RenderWindow & App);
 
-
 private:
 	bool m_Running;
 
@@ -26,6 +26,8 @@ private:
 
 	bool m_Captured;
 	void m_CaptureScreen(sf::RenderWindow & App);
+	
+	
 
 	sf::Event m_Event;
 
@@ -72,6 +74,5 @@ private:
 
 	// czy okno z gra jest aktywne
 	bool m_isActive;
-
 };
 #endif

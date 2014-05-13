@@ -19,11 +19,16 @@ private:
 
 	int m_Screen;
 
+public: 
 	class CGame *m_Game;
 
 	class CMainMenu *m_Menu;
 
 	class CHighScoresMenu *m_ScoresMenu;
+
+	class CLobby *m_Lobby;
+
+	class CError *m_Error;
 
 	vector<CScreen*> m_Screens;
 };

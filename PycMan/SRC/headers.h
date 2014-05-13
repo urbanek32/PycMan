@@ -27,4 +27,7 @@ using namespace std;
 #include "CEnemyGhost.h"
 #include "CMainMenu.h"
 #include "CHighScoresMenu.h"
+#include "CLobby.h"
+#include "CClient.h"
+#include "CError.h"
 #endif
