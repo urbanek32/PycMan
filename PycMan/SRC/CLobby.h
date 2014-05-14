@@ -1,7 +1,7 @@
 #include "headers.h"
 
-#ifndef CWAITROOMSCREEN_H
-#define CWAITROOMSCREEN_H
+#ifndef CLOBBY_H
+#define CLOBBY_H
 
 class CLobby : public CScreen
 {
@@ -13,6 +13,7 @@ public:
 private:
 	bool m_Running;
 	bool triedConnect;
+
 	bool m_Inited;
 	void m_Init();
 

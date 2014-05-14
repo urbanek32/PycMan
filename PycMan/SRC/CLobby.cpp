@@ -15,13 +15,13 @@ CLobby::CLobby()
 	m_Title.setCharacterSize(80);
 
 	klientSiec = new CClient("gracz1", 53000, "127.0.0.1");
+
+	triedConnect = false; //zmienna do sprawdzania czy po wejœciu w loopy próbowa³em siê ³¹czyæ 
+	//(u¿ywam by nie zawiesiæ ekranu, bo enter ma w sobie pêtlê
 }
 
 int CLobby::Run(sf::RenderWindow & App)
-{
-	m_Init();
-	triedConnect = false; //zmienna do sprawdzania czy po wejœciu w loopy próbowa³em siê ³¹czyæ 
-						  //(u¿ywam by nie zawiesiæ ekranu, bo enter ma w sobie pêtlê
+{	
 	while (m_Running)
 	{
 		App.clear();
