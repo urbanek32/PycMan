@@ -34,8 +34,9 @@ public:
 	bool exitFromServer();
 	void sendMessage(string komunikat);
 	void receiveMessage();
-	void sendPing();
-	void receivePing();
+	void sendPing(bool czyNadacOdp);
+	void receivePing(bool nadanyPrzezSerwer, char dane[2 * BUFLEN]);
+	bool commitConnectionWithServer();
 
 };
 #endif

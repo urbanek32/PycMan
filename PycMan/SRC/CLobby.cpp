@@ -20,8 +20,7 @@ CLobby::CLobby()
 int CLobby::Run(sf::RenderWindow & App)
 {
 	m_Init();
-	triedConnect = false; //zmienna do sprawdzania czy po wejœciu w loopy próbowa³em siê ³¹czyæ 
-						  //(u¿ywam by nie zawiesiæ ekranu, bo enter ma w sobie pêtlê
+	
 	while (m_Running)
 	{
 		App.clear();
@@ -42,7 +41,7 @@ int CLobby::Run(sf::RenderWindow & App)
 			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::Escape)
 			{
 				// Wróc do menu g³ównego
-				klientSiec->exitFromServer();				
+				klientSiec->exitFromServer();
 				triedConnect = false; //zmiana w celu ponownego ³¹czenia z serwerem po wejœciu do poczekalni
 				return 0;
 			}
@@ -66,8 +65,7 @@ int CLobby::Run(sf::RenderWindow & App)
 				m_Title.setString("Sorry, but\nYou can not \njoin to server...");
 				triedConnect = true;
 			}
-		}
-		
+		}	
 		
 		//if gracze s¹ to return 1;
 	}
@@ -79,6 +77,8 @@ void CLobby::m_Init()
 {
 	//po naciœniêciu (P) startujê ³¹cz¹c siê z serwerem
 	m_Title.setString("Connecting...");
+	triedConnect = false; //zmienna do sprawdzania czy po wejœciu w loopy próbowa³em siê ³¹czyæ 
+							//(u¿ywam by nie zawiesiæ ekranu, bo enter ma w sobie pêtlê
 	m_Inited = true;
 }
 

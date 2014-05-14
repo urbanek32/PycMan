@@ -12,6 +12,7 @@ using namespace std;
 
 CClient::CClient(string nick, UInt16 portSerwera, IPAddress ipSerwera)
 {
+	connected = false;
 	playerNick = nick;
 	serwerPort = portSerwera;
 	serwerIP = new IPAddress("127.0.0.1");
@@ -31,9 +32,9 @@ bool CClient::enterToServer()
 	{
 		socket.send(ENTERCOMMAND, 6, *serwerIP, serwerPort); //próbujê ³¹czyæ
 		while ((t2 - t1 < 5)) //jeœli w ci¹gu 5 sekund nie przyjdzie ping tzn ¿e serwer nie dzia³a = nie po³¹czy³em siê
-		{			
-			sendPing();
-			receivePing();
+		{
+			sendPing(false);
+			commitConnectionWithServer();
 			if (pingPoszedl == false)
 			{
 				connected = true;
@@ -43,8 +44,7 @@ bool CClient::enterToServer()
 		}
 		return false;
 	}
-	else return false;
-	
+	else return false;	
 }
 
 bool CClient::exitFromServer()
@@ -55,19 +55,18 @@ bool CClient::exitFromServer()
 		if (connected)
 		{
 			string dane = "ILEFT " + playerNick;
-			if (socket.send(dane.c_str(), dane.length(), *serwerIP, serwerPort) == moje::Socket::Done)
-			{
-				connected = false;
-				return true;
-			}
+			socket.send(dane.c_str(), dane.length(), *serwerIP, serwerPort);
+			connected = false;
+			return true;			
 		}
+		return false;
 	}
 	return false;
 }
 
 void CClient::sendMessage(string komunikat)
 {
-
+	socket.send(komunikat.c_str(), komunikat.length(), *serwerIP, serwerPort);
 }
 
 void CClient::receiveMessage()
@@ -80,35 +79,63 @@ void CClient::receiveMessage()
 			if (socket.receive(dane, BUFLEN, ileOdebranych, ostatniKolegaIP, ostatniKolegaPort) == moje::Socket::Done)
 			{
 				odebrane = dane;
-				
-			}
+				receivePing(true, dane);
+				receivePing(false, dane);
+				/* tutaj odbieramy pozosta³e komunikaty */
+			}				
 		}
 	}
 }
 
-
-//póki co do nadawania i odebrania moich zapytañ
-void CClient::sendPing()
+void CClient::sendPing(bool czyNadacOdp)
 {
 	if (ready)
 	{
 		if (connected)
 		{
-			//std::string msg = "PINGYOLO";
-			if (socket.send(PINGSENDCOMMAND, 8, *serwerIP, serwerPort) != moje::Socket::Done)
+			if (czyNadacOdp)
 			{
-				//nie wyslano pingu
+				socket.send(PINGRECEIVECOMMAND, 8, *serwerIP, serwerPort);
 			}
 			else
-			{
-				serwerOn = false;
-				pingPoszedl = true;
+			{				
+				if (socket.send(PINGSENDCOMMAND, 8, *serwerIP, serwerPort) == moje::Socket::Done)
+				{
+					serwerOn = false;
+					pingPoszedl = true;
+				}
 			}
+		}
+		else if (socket.send(PINGSENDCOMMAND, 8, *serwerIP, serwerPort) == moje::Socket::Done)
+		{
+			serwerOn = false;
+			pingPoszedl = true;
 		}
 	}
 }
 
-void CClient::receivePing()
+void CClient::receivePing(bool odebranyPrzezSerwer, char dane[2 * BUFLEN])
+{
+	odebrane = dane;
+	if (odebranyPrzezSerwer)
+	{
+		if (gdzie = odebrane.find(PINGRECEIVECOMMAND) == std::string::npos)
+		{
+			serwerOn = true;
+			pingPoszedl = false;
+		}
+	}
+	else
+	{
+		if (gdzie = odebrane.find(PINGSENDCOMMAND) == std::string::npos)
+		{
+			sendPing(true);//nadajê odp do servera
+		}
+	}
+	
+}
+
+bool CClient::commitConnectionWithServer()
 {
 	memset(dane, '\0', BUFLEN);
 	if (socket.receive(dane, BUFLEN, ileOdebranych, ostatniKolegaIP, ostatniKolegaPort) == moje::Socket::Done)
@@ -118,6 +145,9 @@ void CClient::receivePing()
 		{
 			serwerOn = true;
 			pingPoszedl = false;
+			return true;
 		}
+		else return false;
 	}
+	else return false;
 }
