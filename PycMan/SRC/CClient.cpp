@@ -28,6 +28,7 @@ CClient::CClient(string nick, UInt16 portSerwera, IPAddress ipSerwera)
 bool CClient::enterToServer()
 {
 	t1 = m_timer.getElapsedTime().asSeconds();
+	t2 = 0.0;
 	if (ready)
 	{
 		socket.send(ENTERCOMMAND, 6, *serwerIP, serwerPort); //próbujê ³¹czyæ

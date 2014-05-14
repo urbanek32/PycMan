@@ -19,7 +19,7 @@ CLobby::CLobby()
 
 int CLobby::Run(sf::RenderWindow & App)
 {
-	m_Init();
+	//m_Init();
 	
 	while (m_Running)
 	{
@@ -43,6 +43,7 @@ int CLobby::Run(sf::RenderWindow & App)
 				// Wróc do menu g³ównego
 				klientSiec->exitFromServer();
 				triedConnect = false; //zmiana w celu ponownego ³¹czenia z serwerem po wejœciu do poczekalni
+				m_Inited = false; // po wyjœciu udawaj ¿e obiekt jest jeszcze nie ustawiony aby przywróciæ stan pocz¹tkowy
 				return 0;
 			}
 
