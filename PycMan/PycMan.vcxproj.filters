@@ -45,9 +45,6 @@
     <ClCompile Include="SRC\CClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SRC\CError.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SRC\CLobby.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -84,9 +81,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SRC\CClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SRC\CError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SRC\CLobby.h">

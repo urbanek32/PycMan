@@ -39,12 +39,10 @@ void CGameManager::m_Init()
 	m_Menu = new CMainMenu();
 	m_ScoresMenu = new CHighScoresMenu();
 	m_Lobby = new CLobby();
-	m_Error = new CError();
 
 	m_Screens.push_back(m_Menu); // 0
 	m_Screens.push_back(m_Game); // 1
 	m_Screens.push_back(m_ScoresMenu); // 2
 	m_Screens.push_back(m_Lobby); // 3
-	m_Screens.push_back(m_Error); // 4
 
 }

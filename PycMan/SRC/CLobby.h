@@ -12,7 +12,7 @@ public:
 
 private:
 	bool m_Running;
-
+	bool triedConnect;
 	bool m_Inited;
 	void m_Init();
 

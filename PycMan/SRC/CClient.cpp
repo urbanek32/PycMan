@@ -1,5 +1,5 @@
 #include "headers.h"
-/*dupadupadupa*/
+
 using namespace moje;
 using namespace std;
 
@@ -9,14 +9,6 @@ using namespace std;
 #define LEFTCOMMAND "ILEFT"
 #define PINGSENDCOMMAND "PINGSEND"
 #define PINGRECEIVECOMMAND "PINGRECEIVE"
-
-/*double GetTime()
-{
-	long long f, t;
-	QueryPerformanceFrequency((PLARGE_INTEGER)&f);
-	QueryPerformanceCounter((PLARGE_INTEGER)&t);
-	return (double)t / (double)f;
-}*/
 
 CClient::CClient(string nick, UInt16 portSerwera, IPAddress ipSerwera)
 {
@@ -34,18 +26,22 @@ CClient::CClient(string nick, UInt16 portSerwera, IPAddress ipSerwera)
 
 bool CClient::enterToServer()
 {
+	t1 = m_timer.getElapsedTime().asSeconds();
 	if (ready)
 	{
-		socket.send(ENTERCOMMAND, 6, *serwerIP, serwerPort);	
-		sendPing();
-		while ((t2 - t1 < 5 && pingPoszedl == true)) //jeœli w ci¹gu 5 sekund nie przyjdzie ping tzn ¿e serwer nie dzia³a
-		{
+		socket.send(ENTERCOMMAND, 6, *serwerIP, serwerPort); //próbujê ³¹czyæ
+		while ((t2 - t1 < 5)) //jeœli w ci¹gu 5 sekund nie przyjdzie ping tzn ¿e serwer nie dzia³a = nie po³¹czy³em siê
+		{			
+			sendPing();
+			receivePing();
+			if (pingPoszedl == false)
+			{
+				connected = true;
+				return true;
+			}			
 			t2 = m_timer.getElapsedTime().asSeconds();
-			receivePing(); 
-			cout << "ble";
 		}
-		if (pingPoszedl == false) return true;
-		else return false;
+		return false;
 	}
 	else return false;
 	
@@ -53,6 +49,19 @@ bool CClient::enterToServer()
 
 bool CClient::exitFromServer()
 {
+	//jeœli bla bla bla to siê roz³¹cz
+	if (ready)
+	{
+		if (connected)
+		{
+			string dane = "ILEFT " + playerNick;
+			if (socket.send(dane.c_str(), dane.length(), *serwerIP, serwerPort) == moje::Socket::Done)
+			{
+				connected = false;
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
@@ -63,9 +72,22 @@ void CClient::sendMessage(string komunikat)
 
 void CClient::receiveMessage()
 {
-
+	if (ready)
+	{
+		if (connected)
+		{
+			std::memset(dane, '\0', BUFLEN);
+			if (socket.receive(dane, BUFLEN, ileOdebranych, ostatniKolegaIP, ostatniKolegaPort) == moje::Socket::Done)
+			{
+				odebrane = dane;
+				
+			}
+		}
+	}
 }
 
+
+//póki co do nadawania i odebrania moich zapytañ
 void CClient::sendPing()
 {
 	if (ready)
@@ -79,7 +101,6 @@ void CClient::sendPing()
 			}
 			else
 			{
-				t1 = m_timer.getElapsedTime().asSeconds();
 				serwerOn = false;
 				pingPoszedl = true;
 			}

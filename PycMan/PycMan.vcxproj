@@ -86,7 +86,6 @@
   <ItemGroup>
     <ClCompile Include="SRC\CClient.cpp" />
     <ClCompile Include="SRC\CEnemyGhost.cpp" />
-    <ClCompile Include="SRC\CError.cpp" />
     <ClCompile Include="SRC\CGame.cpp" />
     <ClCompile Include="SRC\CGameManager.cpp" />
     <ClCompile Include="SRC\CHighScoresMenu.cpp" />
@@ -100,7 +99,6 @@
   <ItemGroup>
     <ClInclude Include="SRC\CClient.h" />
     <ClInclude Include="SRC\CEnemyGhost.h" />
-    <ClInclude Include="SRC\CError.h" />
     <ClInclude Include="SRC\CGame.h" />
     <ClInclude Include="SRC\CGameManager.h" />
     <ClInclude Include="SRC\CHighScoresMenu.h" />
