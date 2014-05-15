@@ -1,8 +1,6 @@
 #include "headers.h"
 
 using namespace moje;
-using namespace std;
-
 
 //komendy serwer-klient
 #define ENTERCOMMAND "IENTER"
@@ -10,11 +8,31 @@ using namespace std;
 #define PINGSENDCOMMAND "PINGSEND"
 #define PINGRECEIVECOMMAND "PINGRECEIVE"
 
+CClient::CClient()
+{
+
+}
+
 CClient::CClient(string nick, UInt16 portSerwera, IPAddress ipSerwera)
+{
+	/*connected = false;
+	playerNick = nick;
+	serwerPort = portSerwera;
+	serwerIP = new IPAddress("127.0.0.1");
+
+	if (socket.bind(Socket::AnyPort) == socket.Done)
+	{
+		ready = true;
+		socket.setBlocking(false);
+	}
+	m_timer.restart();*/
+}
+
+void CClient::initClient(const std::string nick, const UInt16 serverPort, const IPAddress serverIP)
 {
 	connected = false;
 	playerNick = nick;
-	serwerPort = portSerwera;
+	serwerPort = serverPort;
 	serwerIP = new IPAddress("127.0.0.1");
 
 	if (socket.bind(Socket::AnyPort) == socket.Done)
