@@ -19,7 +19,6 @@ CLobby::CLobby()
 int CLobby::Run(sf::RenderWindow & App)
 {
 	//m_Init();
-	
 	while (m_Running)
 	{
 		App.clear();

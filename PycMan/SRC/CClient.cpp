@@ -173,7 +173,8 @@ bool CClient::commitConnectionWithServer()
 			serwerOn = true;
 			pingPoszedl = false;
 			return true;
-		}		
+		}	
+		return false;
 	}
 	else return false;
 }
