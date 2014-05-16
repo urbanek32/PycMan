@@ -17,7 +17,12 @@ using namespace std;
 #include <cmath>
 #include <functional>
 
+// Sieciowe
+#include <UDP_Socket.h>
+#include <IPAddress.h>
+
 // Moje w³asne
+#include "TSingleton.h"
 #include "CScreen.h"
 #include "CGameManager.h"
 #include "CResourceManager.h"

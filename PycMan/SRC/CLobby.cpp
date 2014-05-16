@@ -1,6 +1,5 @@
 #include "headers.h"
 
-CClient *klientSiec;
 
 CLobby::CLobby()
 {
@@ -14,12 +13,12 @@ CLobby::CLobby()
 	m_Title.setPosition(140, 70);
 	m_Title.setCharacterSize(80);
 
-	klientSiec = new CClient("gracz1", 53000, "127.0.0.1");
+	gClient.initClient("gracz1", 53000, "127.0.0.1");
 }
 
 int CLobby::Run(sf::RenderWindow & App)
 {
-	m_Init();
+	//m_Init();
 	
 	while (m_Running)
 	{
@@ -33,7 +32,7 @@ int CLobby::Run(sf::RenderWindow & App)
 			if (m_Event.type == sf::Event::Closed)
 			{
 				// Zamknij aplikacje
-				klientSiec->exitFromServer();
+				gClient.exitFromServer();
 				m_Running = false;
 				return (-1);			
 			}
@@ -41,8 +40,9 @@ int CLobby::Run(sf::RenderWindow & App)
 			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::Escape)
 			{
 				// Wróc do menu g³ównego
-				klientSiec->exitFromServer();
+				gClient.exitFromServer();
 				triedConnect = false; //zmiana w celu ponownego ³¹czenia z serwerem po wejœciu do poczekalni
+				m_Inited = false; // po wyjœciu udawaj ¿e obiekt jest jeszcze nie ustawiony aby przywróciæ stan pocz¹tkowy
 				return 0;
 			}
 
@@ -55,7 +55,7 @@ int CLobby::Run(sf::RenderWindow & App)
 		//podmiana tekstu w zale¿noœci od po³¹czenia siê z serwerem
 		if (triedConnect == false)
 		{
-			if (klientSiec->enterToServer())
+			if (gClient.enterToServer())
 			{
 				m_Title.setString("Connected\n to server.\n\nWaiting for\n 4 players...");
 				triedConnect = true;
