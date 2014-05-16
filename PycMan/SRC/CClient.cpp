@@ -31,9 +31,9 @@ bool CClient::enterToServer()
 	if (ready)
 	{
 		socket.send(ENTERCOMMAND, 6, *serwerIP, serwerPort); //próbujê ³¹czyæ
+		sendPing(false); //sprawdzam czy po³¹czy³em
 		while ((t2 - t1 < 5)) //jeœli w ci¹gu 5 sekund nie przyjdzie ping tzn ¿e serwer nie dzia³a = nie po³¹czy³em siê
 		{
-			sendPing(false);
 			commitConnectionWithServer();
 			if (pingPoszedl == false)
 			{
@@ -42,6 +42,8 @@ bool CClient::enterToServer()
 			}			
 			t2 = m_timer.getElapsedTime().asSeconds();
 		}
+		connected = false;
+		pingPoszedl = false;
 		return false;
 	}
 	else return false;	
@@ -55,9 +57,11 @@ bool CClient::exitFromServer()
 		if (connected)
 		{
 			string dane = "ILEFT " + playerNick;
-			socket.send(dane.c_str(), dane.length(), *serwerIP, serwerPort);
-			connected = false;
-			return true;			
+			if (socket.send(dane.c_str(), dane.length(), *serwerIP, serwerPort) == socket.Done)
+			{
+				connected = false;
+				return true;
+			}						
 		}
 		return false;
 	}
@@ -98,7 +102,8 @@ void CClient::sendPing(bool czyNadacOdp)
 				socket.send(PINGRECEIVECOMMAND, 8, *serwerIP, serwerPort);
 			}
 			else
-			{				
+			{
+				cout << connected << "poszedl ping" << endl;
 				if (socket.send(PINGSENDCOMMAND, 8, *serwerIP, serwerPort) == moje::Socket::Done)
 				{
 					serwerOn = false;
@@ -108,6 +113,7 @@ void CClient::sendPing(bool czyNadacOdp)
 		}
 		else if (socket.send(PINGSENDCOMMAND, 8, *serwerIP, serwerPort) == moje::Socket::Done)
 		{
+			cout << "poszedl ping" << endl;
 			serwerOn = false;
 			pingPoszedl = true;
 		}
@@ -140,14 +146,15 @@ bool CClient::commitConnectionWithServer()
 	memset(dane, '\0', BUFLEN);
 	if (socket.receive(dane, BUFLEN, ileOdebranych, ostatniKolegaIP, ostatniKolegaPort) == moje::Socket::Done)
 	{
+		cout << "odebralem receive" << endl;
 		odebrane = dane;
 		if (gdzie = odebrane.find(PINGRECEIVECOMMAND) == std::string::npos)
 		{
+			cout << "potwierdzenie" << endl;
 			serwerOn = true;
 			pingPoszedl = false;
 			return true;
-		}
-		else return false;
+		}		
 	}
 	else return false;
 }
