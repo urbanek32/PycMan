@@ -15,17 +15,7 @@ CClient::CClient()
 
 CClient::CClient(string nick, UInt16 portSerwera, IPAddress ipSerwera)
 {
-	/*connected = false;
-	playerNick = nick;
-	serwerPort = portSerwera;
-	serwerIP = new IPAddress("127.0.0.1");
 
-	if (socket.bind(Socket::AnyPort) == socket.Done)
-	{
-		ready = true;
-		socket.setBlocking(false);
-	}
-	m_timer.restart();*/
 }
 
 void CClient::initClient(const std::string nick, const UInt16 serverPort, const IPAddress serverIP)
@@ -49,7 +39,7 @@ bool CClient::enterToServer()
 	t2 = 0.0;
 	if (ready)
 	{
-		socket.send(ENTERCOMMAND, 6, *serwerIP, serwerPort); //próbujê ³¹czyæ
+		socket.send(ENTERCOMMAND, strlen(ENTERCOMMAND), *serwerIP, serwerPort); //próbujê ³¹czyæ
 		sendPing(false); //sprawdzam czy po³¹czy³em
 		while ((t2 - t1 < 5)) //jeœli w ci¹gu 5 sekund nie przyjdzie ping tzn ¿e serwer nie dzia³a = nie po³¹czy³em siê
 		{
@@ -118,28 +108,28 @@ void CClient::sendPing(bool czyNadacOdp)
 		{
 			if (czyNadacOdp)
 			{
-				socket.send(PINGRECEIVECOMMAND, 8, *serwerIP, serwerPort);
+				socket.send(PINGRECEIVECOMMAND, strlen(PINGRECEIVECOMMAND), *serwerIP, serwerPort);
 			}
 			else
 			{
 				cout << connected << "poszedl ping" << endl;
-				if (socket.send(PINGSENDCOMMAND, 8, *serwerIP, serwerPort) == moje::Socket::Done)
+				if (socket.send(PINGSENDCOMMAND, strlen(PINGSENDCOMMAND), *serwerIP, serwerPort) == moje::Socket::Done)
 				{
 					serwerOn = false;
 					pingPoszedl = true;
 				}
 			}
 		}
-		else if (socket.send(PINGSENDCOMMAND, 8, *serwerIP, serwerPort) == moje::Socket::Done)
+		else if (socket.send(PINGSENDCOMMAND, strlen(PINGSENDCOMMAND), *serwerIP, serwerPort) == moje::Socket::Done)
 		{
-			cout << "poszedl ping" << endl;
+			cout << "ELSE poszedl ping" << endl;
 			serwerOn = false;
 			pingPoszedl = true;
 		}
 	}
 }
 
-void CClient::receivePing(bool odebranyPrzezSerwer, char dane[2 * BUFLEN])
+void CClient::receivePing(bool odebranyPrzezSerwer, char *dane)
 {
 	odebrane = dane;
 	if (odebranyPrzezSerwer)
@@ -162,7 +152,7 @@ void CClient::receivePing(bool odebranyPrzezSerwer, char dane[2 * BUFLEN])
 
 bool CClient::commitConnectionWithServer()
 {
-	memset(dane, '\0', BUFLEN);
+	std::memset(dane, '\0', BUFLEN);
 	if (socket.receive(dane, BUFLEN, ileOdebranych, ostatniKolegaIP, ostatniKolegaPort) == moje::Socket::Done)
 	{
 		cout << "odebralem receive" << endl;
@@ -173,7 +163,15 @@ bool CClient::commitConnectionWithServer()
 			serwerOn = true;
 			pingPoszedl = false;
 			return true;
-		}		
+		}
+		else
+		{
+			cout << "BRAK potwierdzenia" << endl;
+			return false;
+		}
 	}
-	else return false;
+	else
+	{
+		return false;
+	}
 }

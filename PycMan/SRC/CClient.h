@@ -2,6 +2,32 @@
 #define CKLIENT_H
 
 
+/*
+INSTRUKCJA STEP-BY-STEP JAK TO MA DZIA£AÆ (uzupe³nij)
+
+##SERWER##
+-nieustannie odbiera pakiety
+-filtruje dzia³ania na podstawie komunikatów
+-notuje wejœcia/wyjœcia na serwer
+-wysy³a i odpowiada na pingi
+-broadcastuje komunikaty do wszystkich klientów
+
+
+
+##KLIENT##
+-zanim nast¹pi jaka kolwiek wymiana komunikatów z serwerem, wysy³a ping do niego i czeka na odpowiedŸ
+-gdy serwer nie odpowie w ci¹gu [5sek], og³asza ¿e serwer jest nieaktywny
+-gdy serwer odpowie, wysy³a do niego komunikat ¿e  do³¹czamy do serwera
+-odpowiada na pingi serwera
+-sprawdza czy ostatnio wys³any ping na serwer nie by³ dawniej ni¿ [2sek]. Je¿eli by³ to siê roz³¹cza bo serwer pad³
+-czeka na 4graczy do rozpoczêcia gry
+-......
+
+
+*/
+
+
+
 #include "headers.h"
 
 #ifndef gClient

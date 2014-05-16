@@ -112,8 +112,10 @@ int main()
 			{
 				std::cout << dane << "\n";
 			}
+
 			broadcastuj(dane);
 			std::cout << "Klientow: " << klienci.size() << "\n";
+
 		}
 		if (klienci.size() == 2)
 		{
