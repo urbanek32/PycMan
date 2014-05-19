@@ -73,7 +73,7 @@ public:
 	void sendPing(bool czyNadacOdp);
 	void receivePing(bool nadanyPrzezSerwer, char dane[2 * BUFLEN]);
 	bool commitConnectionWithServer();
-
+	bool isThisMessageReceived(string message);
 };
 #endif
 

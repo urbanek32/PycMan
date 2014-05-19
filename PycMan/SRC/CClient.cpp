@@ -95,6 +95,7 @@ void CClient::receiveMessage()
 				receivePing(true, dane);
 				receivePing(false, dane);
 				/* tutaj odbieramy pozosta³e komunikaty */
+
 			}				
 		}
 	}
@@ -146,8 +147,24 @@ void CClient::receivePing(bool odebranyPrzezSerwer, char *dane)
 		{
 			sendPing(true);//nadajê odp do servera
 		}
+	}	
+}
+
+bool CClient::isThisMessageReceived(string message)
+{
+	if (ready)
+	{
+		if (connected)
+		{
+			std::memset(dane, '\0', BUFLEN);
+			if (socket.receive(dane, BUFLEN, ileOdebranych, ostatniKolegaIP, ostatniKolegaPort) == moje::Socket::Done)
+			{
+				odebrane = dane;
+				if (gdzie = odebrane.find(message) != std::string::npos) return true;
+			}
+		}
 	}
-	
+	return false;
 }
 
 bool CClient::commitConnectionWithServer()

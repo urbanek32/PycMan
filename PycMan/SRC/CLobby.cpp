@@ -66,7 +66,7 @@ int CLobby::Run(sf::RenderWindow & App)
 			}
 		}	
 		
-		//if gracze s¹ to return 1;
+		if (gClient.isThisMessageReceived("GRAMY")) return 1; //jeœli serwer przys³a³ gramy to gramy
 	}
 	return (-1);	
 	
