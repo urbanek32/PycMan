@@ -114,6 +114,7 @@ int CGame::Run(sf::RenderWindow & App)
 			if (m_Event.type == sf::Event::Closed)
 			{
 				// Zamknij aplikacje
+				gClient.leaveServer();
 				m_Running = false;
 				return (-1);
 			}
@@ -181,6 +182,7 @@ int CGame::Run(sf::RenderWindow & App)
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
 				{
 					// wróæ do menu
+					gClient.leaveServer();
 					RestartGame(true);
 					return (0);
 

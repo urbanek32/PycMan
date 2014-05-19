@@ -94,7 +94,7 @@ int main()
 	else
 	{
 		cout << "Server is ready to running.\n";
-	}
+	}	
 
 	//g³ówna pêtla serwera
 	while (true)
@@ -121,7 +121,7 @@ int main()
 			}
 			else if (phrasesPosition = odebrane.find(PINGSENDCOMMAND) != string::npos)
 			{
-				std::cout << "Received ping..." << "\n";
+				//std::cout << "Received ping..." << "\n";
 				replyToPing(ipClient, portClient);
 			}
 			else if (phrasesPosition = odebrane.find(PINGRECEIVECOMMAND) != string::npos)
@@ -135,9 +135,9 @@ int main()
 	  //wysy³anie wiadomoœci które nie s¹ odpowiedziami na otrzymane komunikaty
 
 		//jeœli przy³¹czono 2 graczy to rozeœlij ¿e gramy
-		if (clients.size() == 2) 
+		if (clients.size() == 1) 
 		{
-			sendToAllClients(PLAY);
+			sendToAllClients("PLAY");			
 		}
 
 	}

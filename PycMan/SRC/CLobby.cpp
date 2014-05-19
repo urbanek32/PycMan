@@ -1,5 +1,6 @@
 #include "headers.h"
 
+#define PLAY "PLAY"
 
 CLobby::CLobby()
 {
@@ -31,7 +32,7 @@ int CLobby::Run(sf::RenderWindow & App)
 			if (m_Event.type == sf::Event::Closed)
 			{
 				// Zamknij aplikacje
-				//gClient.exitFromServer();
+				gClient.leaveServer();
 				m_Running = false;
 				return (-1);			
 			}
@@ -39,7 +40,7 @@ int CLobby::Run(sf::RenderWindow & App)
 			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::Escape)
 			{
 				// Wróc do menu g³ównego
-				//gClient.exitFromServer();
+				gClient.leaveServer();
 				triedConnect = false; //zmiana w celu ponownego ³¹czenia z serwerem po wejœciu do poczekalni
 				m_Inited = false; // po wyjœciu udawaj ¿e obiekt jest jeszcze nie ustawiony aby przywróciæ stan pocz¹tkowy
 				return 0;
@@ -54,7 +55,7 @@ int CLobby::Run(sf::RenderWindow & App)
 		//podmiana tekstu w zale¿noœci od po³¹czenia siê z serwerem
 		if (triedConnect == false)
 		{
-			/*if (gClient.enterToServer())
+			if (gClient.enterToServer())
 			{
 				m_Title.setString("Connected\n to server.\n\nWaiting for\n 4 players...");
 				triedConnect = true;
@@ -63,9 +64,9 @@ int CLobby::Run(sf::RenderWindow & App)
 			{
 				m_Title.setString("Sorry, but\nYou can not \njoin to server...");
 				triedConnect = true;
-			}*/
-		}	
-		//if (gClient.isThisMessageReceived("PLAY")) return 1; //jeœli serwer przys³a³ gramy to gramy
+			}
+		}
+		if (gClient.receiveMessage(PLAY)) return 1; //jeœli serwer przys³a³ PLAY to gramy
 	}
 	return (-1);	
 	

@@ -51,6 +51,9 @@ public:
 
 	//metody dogaduj¹ce siê z serwerem
 	bool isServerReady();
+	bool enterToServer();
+	bool leaveServer();
+	bool receiveMessage(string);
 };
 #endif
 

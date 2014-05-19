@@ -40,12 +40,55 @@ bool CClient::isServerReady()
 			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
 			{
 				odebrane = data; //niejawne rzutowanie na stringa
-				if (phrasesPosition = odebrane.find(PINGRECEIVECOMMAND) != string::npos) return true;
+				if (phrasesPosition = odebrane.find(PINGRECEIVECOMMAND) != string::npos)
+				{
+					serverOn = true;
+					return true;
+				}
 			}
 			t2 = m_timer.getElapsedTime().asSeconds();
 		}
+		serverOn = false;
 		return false;
 	}
 	else return false;
+}
+
+bool CClient::enterToServer()
+{
+	if (isServerReady())
+	{
+		socket.send(ENTERCOMMAND, strlen(ENTERCOMMAND), *serverIP, serverPort);
+		connectedToServer = true;
+		return true;
+	}
+}
+
+bool CClient::leaveServer()
+{
+	if (isServerReady())
+	{
+		socket.send(LEFTCOMMAND, strlen(LEFTCOMMAND), *serverIP, serverPort);
+		connectedToServer = false;
+		return true;
+	}
+	return false;
+}
+
+//sprawdza czy otrzymano dan¹ wiadomoœæ
+bool CClient::receiveMessage(string expectedMessage)
+{
+	if (connectedToServer)
+	{
+		if (isServerReady())
+		{
+			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
+			{
+				odebrane = data; //niejawne rzutowanie na stringa
+				if (phrasesPosition = odebrane.find(expectedMessage) != string::npos) return true; 
+			}
+		}
+	}	
+	return false;
 }
 
