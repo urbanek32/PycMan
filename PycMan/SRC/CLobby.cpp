@@ -51,19 +51,30 @@ int CLobby::Run(sf::RenderWindow & App)
 		App.display();
 
 		//podmiana tekstu w zale¿noœci od po³¹czenia siê z serwerem
-		if (triedConnect == false)
-		{
-			if (gClient.enterToServer())
-			{
-				m_Title.setString("Connected\n to server.\n\nWaiting for\n 4 players...");
-				triedConnect = true;
-			}
-			else
-			{
-				m_Title.setString("Sorry, but\nYou can not \njoin to server...");
-				triedConnect = true;
-			}
+// 		if (triedConnect == false)
+// 		{
+// 			if (gClient.enterToServer())
+// 			{
+// 				m_Title.setString("Connected\n to server.\n\nWaiting for\n 4 players...");
+// 				triedConnect = true;
+// 				return 1;
+// 			}
+// 			else
+// 			{
+// 				m_Title.setString("Sorry, but\nYou can not \njoin to server...");
+// 				triedConnect = true;
+// 			}
+// 		}
+
+		m_mutex.lock();
+		if (!triedConnect)
+		{	
+			m_Title.setString(m_Title.getString()+".");
+			if (m_Title.getString().getSize() > 13)
+				m_Title.setString("Connecting");
 		}
+		m_mutex.unlock();
+
 		if (gClient.receiveMessage("PLAY")) return 1; //jeœli serwer przys³a³ PLAY to gramy, te¿ powoduje œcinanie okna
 													//nowy w¹tek?
 	}
@@ -78,5 +89,32 @@ void CLobby::m_Init()
 	triedConnect = false; //zmienna do sprawdzania czy po wejœciu w loopy próbowa³em siê ³¹czyæ 
 							//(u¿ywam by nie zawiesiæ ekranu, bo enter ma w sobie pêtlê
 	m_Inited = true;
+
+	m_th = new sf::Thread(&CLobby::tryConnect, this);
+	m_th->launch();
+}
+
+void CLobby::tryConnect()
+{
+	//podmiana tekstu w zale¿noœci od po³¹czenia siê z serwerem
+	if (triedConnect == false)
+	{
+		if (gClient.enterToServer())
+		{
+			m_mutex.lock();
+			m_Title.setString("Connected\n to server.\n\nWaiting for\n 4 players...");
+			m_mutex.unlock();
+			triedConnect = true;
+			
+		}
+		else
+		{
+			m_mutex.lock();
+			m_Title.setString("Sorry, but\nYou can not \njoin to server...");
+			m_mutex.unlock();
+			triedConnect = true;
+			
+		}
+	}
 }
 

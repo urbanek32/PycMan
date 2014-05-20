@@ -83,7 +83,8 @@ int main()
 	size_t bytesLength, phrasesPosition;	
 
 	//blokowanie socketa...???
-	socket.setBlocking(false);
+	//znaczy tyle ¿e funkcja receive nie czeka na pakiety tylko zwraca b³¹d gdy nie ma pakietów do odebrania
+	socket.setBlocking(true);
 
 	//bindowanie servera z portem
 	if (socket.bind(serverPort) != moje::Socket::Done)
@@ -137,11 +138,12 @@ int main()
 		//jeœli przy³¹czono 2 graczy to rozeœlij ¿e gramy
 		if (clients.size() == 2) 
 		{
-			sendToAllClients("PLAY");			
+			sendToAllClients("PLAY");		
+			std::cout << "PLAY\n";
 		}
 		else
 		{
-			sendToAllClients("STOPPLAY");
+			//sendToAllClients("STOPPLAY");
 		}
 
 	}

@@ -23,6 +23,11 @@ private:
 
 	sf::Text m_Title;
 
+	sf::Thread *m_th;
+	sf::Mutex m_mutex;
+
+	void tryConnect();
+
 };
 #endif
 

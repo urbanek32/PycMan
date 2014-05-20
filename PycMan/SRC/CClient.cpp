@@ -67,11 +67,14 @@ bool CClient::enterToServer()
 
 bool CClient::leaveServer()
 {
-	if (isServerReady(1))
+	if (connectedToServer)
 	{
-		socket.send(LEFTCOMMAND, strlen(LEFTCOMMAND), *serverIP, serverPort);
-		connectedToServer = false;
-		return true;
+		if (isServerReady(1))
+		{
+			socket.send(LEFTCOMMAND, strlen(LEFTCOMMAND), *serverIP, serverPort);
+			connectedToServer = false;
+			return true;
+		}
 	}
 	return false;
 }
@@ -86,6 +89,7 @@ bool CClient::receiveMessage(string expectedMessage)
 			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
 			{
 				odebrane = data; //niejawne rzutowanie na stringa
+				std::cout << "\t" << odebrane;
 				if (phrasesPosition = odebrane.find(expectedMessage) != string::npos) return true; 
 			}
 		}
