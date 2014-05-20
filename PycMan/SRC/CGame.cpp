@@ -76,7 +76,10 @@ CGame::CGame()
 
 int CGame::Run(sf::RenderWindow & App)
 {
-	m_Running = true;	
+	m_Running = true;
+
+	//tutaj wstawiæ nowy w¹tek pingowania serwera
+	//...........................................
 	while( m_Running )
 	{
 		App.clear();
@@ -97,6 +100,8 @@ int CGame::Run(sf::RenderWindow & App)
 		if( !m_Inited )
 			m_Init();
 
+		if (gClient.receiveMessage("STOPPLAY")) return 3; //jeœli server straci klienta i bêdzie mniej ni¿ n graczy
+		// to tutaj przyjdzie wiadomoœæ i trzeba np wróciæ do menu, nowy w¹tek??? nie ogarniam jak go zrobiæ
 		
 		while(App.pollEvent(m_Event))
 		{

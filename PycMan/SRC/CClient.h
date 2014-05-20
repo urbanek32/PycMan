@@ -43,14 +43,14 @@ private:
 	sf::Clock m_timer; // jak sama nazwa wskazuje
 	
 public:
-
+	
 	CClient();
 
 	//z racji globalnego klienta, u¿ywamy metody a nie konstruktora do inicjalizacji
 	void initClient(const string nick, const UInt16 serverPort, const IPAddress serverIP);
 
 	//metody dogaduj¹ce siê z serwerem
-	bool isServerReady();
+	bool isServerReady(double);
 	bool enterToServer();
 	bool leaveServer();
 	bool receiveMessage(string);

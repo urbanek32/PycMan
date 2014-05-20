@@ -16,6 +16,7 @@ using namespace std;
 #include <sstream>
 #include <cmath>
 #include <functional>
+#include <Windows.h>
 
 // Sieciowe
 #include <UDP_Socket.h>

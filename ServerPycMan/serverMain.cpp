@@ -135,9 +135,13 @@ int main()
 	  //wysy³anie wiadomoœci które nie s¹ odpowiedziami na otrzymane komunikaty
 
 		//jeœli przy³¹czono 2 graczy to rozeœlij ¿e gramy
-		if (clients.size() == 1) 
+		if (clients.size() == 2) 
 		{
 			sendToAllClients("PLAY");			
+		}
+		else
+		{
+			sendToAllClients("STOPPLAY");
 		}
 
 	}

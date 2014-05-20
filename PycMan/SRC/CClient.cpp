@@ -29,13 +29,13 @@ void CClient::initClient(const string nick, const UInt16 serverPort, const IPAdd
 	}	
 }
 
-bool CClient::isServerReady()
+bool CClient::isServerReady(double time)
 {
 	double t1, t2 = 0;
 	if (socket.send(PINGSENDCOMMAND, strlen(PINGSENDCOMMAND), *serverIP, serverPort) == Socket::Done)
 	{
 		t1 = m_timer.getElapsedTime().asSeconds();
-		while (t2 - t1 < 5)
+		while (t2 - t1 < time)
 		{
 			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
 			{
@@ -56,17 +56,18 @@ bool CClient::isServerReady()
 
 bool CClient::enterToServer()
 {
-	if (isServerReady())
+	if (isServerReady(3))
 	{
 		socket.send(ENTERCOMMAND, strlen(ENTERCOMMAND), *serverIP, serverPort);
 		connectedToServer = true;
 		return true;
 	}
+	return false;
 }
 
 bool CClient::leaveServer()
 {
-	if (isServerReady())
+	if (isServerReady(1))
 	{
 		socket.send(LEFTCOMMAND, strlen(LEFTCOMMAND), *serverIP, serverPort);
 		connectedToServer = false;
@@ -80,7 +81,7 @@ bool CClient::receiveMessage(string expectedMessage)
 {
 	if (connectedToServer)
 	{
-		if (isServerReady())
+		if (isServerReady(1))
 		{
 			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
 			{
@@ -88,7 +89,7 @@ bool CClient::receiveMessage(string expectedMessage)
 				if (phrasesPosition = odebrane.find(expectedMessage) != string::npos) return true; 
 			}
 		}
-	}	
+	}
 	return false;
 }
 

@@ -1,7 +1,5 @@
 #include "headers.h"
 
-#define PLAY "PLAY"
-
 CLobby::CLobby()
 {
 	m_Running = true;
@@ -66,7 +64,8 @@ int CLobby::Run(sf::RenderWindow & App)
 				triedConnect = true;
 			}
 		}
-		if (gClient.receiveMessage(PLAY)) return 1; //jeœli serwer przys³a³ PLAY to gramy
+		if (gClient.receiveMessage("PLAY")) return 1; //jeœli serwer przys³a³ PLAY to gramy, te¿ powoduje œcinanie okna
+													//nowy w¹tek?
 	}
 	return (-1);	
 	
