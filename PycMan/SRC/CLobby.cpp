@@ -17,7 +17,6 @@ CLobby::CLobby()
 
 int CLobby::Run(sf::RenderWindow & App)
 {
-	//m_Init();
 	while (m_Running)
 	{
 		App.clear();
@@ -75,7 +74,7 @@ int CLobby::Run(sf::RenderWindow & App)
 		}
 		m_mutex.unlock();
 
-		if (gClient.receiveMessage("PLAY")) return 1; //jeœli serwer przys³a³ PLAY to gramy, te¿ powoduje œcinanie okna
+		if (gClient.receiveMessage(Typ::START)) return 1; //jeœli serwer przys³a³ PLAY to gramy, te¿ powoduje œcinanie okna
 													//nowy w¹tek?
 	}
 	return (-1);	

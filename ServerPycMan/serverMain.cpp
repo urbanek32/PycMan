@@ -7,6 +7,7 @@
 - broadcastuje komunikaty do wszystkich klientów
 */
 
+
 #define WIN32_LEAN_AND_MEAN  
 #include <windows.h>
 #include <windowsx.h>
@@ -17,6 +18,8 @@
 #include <UDP_Socket.h>
 #include <IPAddress.h>
 
+#include <json/json.h>
+
 using namespace moje;
 using namespace std;
 
@@ -25,7 +28,7 @@ class ServerClient
 public:
 	IPAddress address;
 	UInt16 port;
-	bool isLife;
+	bool isAlive;
 
 	ServerClient(){}
 
@@ -33,11 +36,11 @@ public:
 	{
 		this->address = address;
 		this->port = port;
-		this->isLife = true;
+		this->isAlive = true;
 	}	
 };
 
-#define BUFLEN 200
+#define BUFLEN 500
 
 //komendy serwera
 #define ENTERCOMMAND "IENTER"
@@ -45,6 +48,13 @@ public:
 #define PINGSENDCOMMAND "PINGSEND"
 #define PINGRECEIVECOMMAND "PINGRECEIVE"
 #define PLAY "PLAY"
+
+enum Typ
+{
+	UNKNOWN = -1, 
+	ENTER, LEAVE, POS, START, STOP,
+	SPECIAL = 10, PINGREQUEST, PONGRESPONSE
+};
 
 //funkcje serwera
 void sendToAllClients(char* msg);
@@ -59,29 +69,41 @@ void receiveReplyToPing(IPAddress &adres, UInt16 &port);
 
 void pingAllClients();
 
+void receiveMessages();
+
 //wektor trzymaj¹cy pod³¹czonych klientów
 vector<ServerClient> clients;
 
 //socket servera
 UDP_Socket socket;
 
+//typ otrzymanego pakietu
+Typ typ;
+
+//do czytania w formacie JSON
+Json::Reader reader;
+//pakiet w formacie JSON
+Json::Value pakiet;
+//do zapisywania w formacie JSON
+Json::FastWriter writer;
+
+//sk³adowe serwera	
+UInt16 serverPort = 53000;
+
+//dane nadawcy
+IPAddress ipClient;
+UInt16 portClient;
+string nickClient;
+
+//dane odebrane
+char data[2 * BUFLEN];
+string odebrane;
+
+//atrybuty odebranych danych
+size_t bytesLength, phrasesPosition;
+
 int main()
 {
-	//sk³adowe serwera	
-	UInt16 serverPort = 53000;
-
-	//dane nadawcy
-	IPAddress ipClient;
-	UInt16 portClient;
-	string nickClient;
-
-	//dane odebrane
-	char data[2 * BUFLEN];
-	string odebrane;
-
-	//atrybuty odebranych danych
-	size_t bytesLength, phrasesPosition;	
-
 	//blokowanie socketa...???
 	//znaczy tyle ¿e funkcja receive nie czeka na pakiety tylko zwraca b³¹d gdy nie ma pakietów do odebrania
 	socket.setBlocking(true);
@@ -100,54 +122,124 @@ int main()
 	//g³ówna pêtla serwera
 	while (true)
 	{
-		memset(data, '\0', BUFLEN); //czyszczenie miejsca w pamiêci na odebranie danych
+		receiveMessages();
 
-		if (socket.receive(data, BUFLEN, bytesLength, ipClient, portClient) == Socket::Done)
-		{
-			odebrane = data; //niejawne rzutowanie na stringa
-
-			//Je¿eli fraza b¹dŸ znak nie zosta³ odnaleziony w przeszukiwanym tekœcie 
-			//to wówczas metoda find zwraca wartoœæ std::string::npos
-			if (phrasesPosition = odebrane.find(ENTERCOMMAND) != string::npos)
-			{
-				std::cout << "New Client connected.\t" << odebrane.erase(phrasesPosition - 1, strlen(ENTERCOMMAND)) << "\n";
-				addNewClient(ipClient, portClient);
-				cout << "Count of clients: " << clients.size() << "\n";
-			}
-			else if (phrasesPosition = odebrane.find(LEFTCOMMAND) != string::npos)
-			{
-				std::cout << "Client left server:\t" << odebrane.erase(phrasesPosition - 1, strlen(LEFTCOMMAND)) << "\n";
-				deleteClient(ipClient, portClient);
-				cout << "Count of clients: " << clients.size() << "\n";
-			}
-			else if (phrasesPosition = odebrane.find(PINGSENDCOMMAND) != string::npos)
-			{
-				//std::cout << "Received ping..." << "\n";
-				replyToPing(ipClient, portClient);
-			}
-			else if (phrasesPosition = odebrane.find(PINGRECEIVECOMMAND) != string::npos)
-			{
-				std::cout << "Received respons to ping..." << "\n";
-				receiveReplyToPing(ipClient, portClient);
-			}
-			//tutaj odbiór kolejnych komunikatów....
-		}
-
-	  //wysy³anie wiadomoœci które nie s¹ odpowiedziami na otrzymane komunikaty
+		//wysy³anie wiadomoœci które nie s¹ odpowiedziami na otrzymane komunikaty
 
 		//jeœli przy³¹czono 2 graczy to rozeœlij ¿e gramy
 		if (clients.size() == 2) 
 		{
-			sendToAllClients("PLAY");		
-			std::cout << "PLAY\n";
+			pakiet.clear();
+			pakiet["typ"] = Typ::START;
+			odebrane = writer.write(pakiet);
+			sendToAllClients( const_cast<char*>( odebrane.c_str()) );
+			//std::cout << "PLAY\n";
 		}
 		else
 		{
-			//sendToAllClients("STOPPLAY");
+			pakiet.clear();
+			pakiet["typ"] = Typ::STOP;
+			odebrane = writer.write(pakiet);
+			sendToAllClients(const_cast<char*>( odebrane.c_str()) );
 		}
 
 	}
 	return 0;
+}
+
+// odbiera pakiet wiadomoœci i ustala jego typ
+void receiveMessages()
+{
+	std::memset(data, '\0', BUFLEN); //czyszczenie miejsca w pamiêci na odebranie danych
+
+	if (socket.receive(data, BUFLEN, bytesLength, ipClient, portClient) == Socket::Done)
+	{
+		odebrane = data; //niejawne rzutowanie na stringa
+
+		bool _parsingOK = reader.parse(odebrane, pakiet); // przeczytaj pakiet jako JSON
+
+		if (!_parsingOK)
+		{
+			std::cout << "Failed to parse JSON packet\n" << reader.getFormattedErrorMessages();
+		}
+
+		typ = static_cast<Typ>( pakiet.get("typ", -1).asInt() ); // odczytaj typ pakietu i go zapisz
+
+		switch (typ)
+		{
+			case Typ::ENTER:
+			{
+				std::cout << "New Client connected\n";
+				addNewClient(ipClient, portClient);
+				std::cout << "Count of clients: " << clients.size() << "\n";
+				break;
+			}
+
+			case Typ::LEAVE:
+			{
+				std::cout << "Client left server\n";
+				deleteClient(ipClient, portClient);
+				std::cout << "Count of clients: " << clients.size() << "\n";
+				break;
+			}
+
+			case Typ::POS:
+			{
+				std::cout << "Packet with position\n";
+				//rozeœlij otrzyman¹ pozycje do reszty
+				break;
+			}
+			
+			case Typ::PINGREQUEST:
+			{
+				//std::cout << "Received ping..." << "\n";
+				replyToPing(ipClient, portClient);
+				break;
+			}
+		
+			case Typ::PONGRESPONSE:
+			{
+				std::cout << "Received respons to ping..." << "\n";
+				receiveReplyToPing(ipClient, portClient);
+				break;
+			}
+
+			case Typ::UNKNOWN:
+			{
+				std::cout << "Received unknown packet... ERROR?!?!?!" << "\n";
+				break;
+			}
+		}
+
+		/*
+		//Je¿eli fraza b¹dŸ znak nie zosta³ odnaleziony w przeszukiwanym tekœcie 
+		//to wówczas metoda find zwraca wartoœæ std::string::npos
+		if (phrasesPosition = odebrane.find(ENTERCOMMAND) != string::npos)
+		{
+			std::cout << "New Client connected.\t" << odebrane.erase(phrasesPosition - 1, strlen(ENTERCOMMAND)) << "\n";
+			addNewClient(ipClient, portClient);
+			cout << "Count of clients: " << clients.size() << "\n";
+		}
+		else if (phrasesPosition = odebrane.find(LEFTCOMMAND) != string::npos)
+		{
+			std::cout << "Client left server:\t" << odebrane.erase(phrasesPosition - 1, strlen(LEFTCOMMAND)) << "\n";
+			deleteClient(ipClient, portClient);
+			cout << "Count of clients: " << clients.size() << "\n";
+		}
+		else if (phrasesPosition = odebrane.find(PINGSENDCOMMAND) != string::npos)
+		{
+			//std::cout << "Received ping..." << "\n";
+			replyToPing(ipClient, portClient);
+		}
+		else if (phrasesPosition = odebrane.find(PINGRECEIVECOMMAND) != string::npos)
+		{
+			std::cout << "Received respons to ping..." << "\n";
+			receiveReplyToPing(ipClient, portClient);
+		}
+		*/
+
+		//tutaj odbiór kolejnych komunikatów....
+	}
 }
 
 //funkcja wywo³ywana po tym jak serwer otrzyma odpowiedŸ na pinga wys³anego przez siebie do clienta
@@ -159,7 +251,7 @@ void receiveReplyToPing(IPAddress &adres, UInt16 &port)
 		{
 			if (it->address == adres && it->port == port)
 			{
-				it->isLife = true; //aktualizacja pola mówi¹cego o tym czy klient ¿yje
+				it->isAlive = true; //aktualizacja pola mówi¹cego o tym czy klient ¿yje
 				return;
 			}
 		}
@@ -171,10 +263,14 @@ void pingAllClients()
 {
 	if (clients.size() > 0)
 	{
+		pakiet.clear();
+		pakiet["typ"] = Typ::PINGREQUEST;
+		odebrane = writer.write(pakiet);
+
 		for (UInt32 i = 0; i < clients.size(); i++)
 		{
-			clients[i].isLife = false;
-			if (socket.send(PINGSENDCOMMAND, strlen(PINGSENDCOMMAND), clients[i].address, clients[i].port) != Socket::Done)
+			clients[i].isAlive = false;
+			if (socket.send(odebrane.c_str(), odebrane.length(), clients[i].address, clients[i].port) != Socket::Done)
 			{
 				cout << "Cannot send ping to " << clients[i].address.toString() << ":" << clients[i].port << "\n";
 			}
@@ -185,7 +281,11 @@ void pingAllClients()
 //odpowiada na otrzymanego od klienta pinga
 void replyToPing(IPAddress adres, UInt16 port)
 {
-	if (socket.send(PINGRECEIVECOMMAND, strlen(PINGRECEIVECOMMAND), adres, port) != Socket::Done)
+	pakiet.clear();
+	pakiet["typ"] = Typ::PONGRESPONSE;
+	odebrane = writer.write(pakiet);
+
+	if (socket.send(odebrane.c_str(), odebrane.length(), adres, port) != Socket::Done)
 	{
 		cout << "Error: failed reply to ping.\n";
 	}

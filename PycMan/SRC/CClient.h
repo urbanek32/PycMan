@@ -7,9 +7,16 @@
 #define gClient CClient::GetReference()
 #endif
 
-#define BUFLEN 200
+#define BUFLEN 500
 using namespace std;
 using namespace moje;
+
+enum Typ
+{
+	UNKNOWN = -1,
+	ENTER, LEAVE, POS, START, STOP,
+	SPECIAL = 10, PINGREQUEST, PONGRESPONSE
+};
 
 class CClient : public TSingleton<CClient>
 {
@@ -41,6 +48,16 @@ private:
 
 	//pomocnik
 	sf::Clock m_timer; // jak sama nazwa wskazuje
+
+	//typ odebranego pakietu
+	Typ m_typ;
+
+	//do czytania w formacie JSON
+	Json::Reader m_reader;
+	//pakiet w formacie JSON
+	Json::Value m_pakiet;
+	//do zapisywania w formacie JSON
+	Json::FastWriter m_writer;
 	
 public:
 	
@@ -53,7 +70,11 @@ public:
 	bool isServerReady(double);
 	bool enterToServer();
 	bool leaveServer();
-	bool receiveMessage(string);
+	bool receiveMessage(std::string);
+	bool receiveMessage(const Typ);
+
+	Json::Value getReceivedPacket();
+	Typ typeOfReceivedMessage();
 };
 #endif
 

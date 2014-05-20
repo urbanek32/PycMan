@@ -100,7 +100,12 @@ int CGame::Run(sf::RenderWindow & App)
 		if( !m_Inited )
 			m_Init();
 
-		if (gClient.receiveMessage("STOPPLAY")) return 3; //jeœli server straci klienta i bêdzie mniej ni¿ n graczy
+		//jeœli server straci klienta i bêdzie mniej ni¿ n graczy
+		if (gClient.receiveMessage(Typ::STOP)) 
+		{
+			RestartGame(true);
+			return 3; 
+		}
 		// to tutaj przyjdzie wiadomoœæ i trzeba np wróciæ do menu, nowy w¹tek??? nie ogarniam jak go zrobiæ
 		
 		while(App.pollEvent(m_Event))
