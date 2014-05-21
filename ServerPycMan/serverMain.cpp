@@ -29,14 +29,16 @@ public:
 	IPAddress address;
 	UInt16 port;
 	bool isAlive;
+	bool isMaster;
 
 	ServerClient(){}
 
-	ServerClient(IPAddress address, UInt16 port)
+	ServerClient(IPAddress address, UInt16 port, bool _isMaster = false)
 	{
 		this->address = address;
 		this->port = port;
 		this->isAlive = true;
+		this->isMaster = _isMaster;
 	}	
 };
 
@@ -53,7 +55,8 @@ enum Typ
 {
 	UNKNOWN = -1, 
 	ENTER, LEAVE, POS, START, STOP,
-	SPECIAL = 10, PINGREQUEST, PONGRESPONSE
+	SPECIAL = 10, PINGREQUEST, PONGRESPONSE, 
+	MASTER = 20, NOTMASTER, MASTERLEFT
 };
 
 //funkcje serwera
@@ -70,6 +73,8 @@ void receiveReplyToPing(IPAddress &adres, UInt16 &port);
 void pingAllClients();
 
 void receiveMessages();
+
+void broadcastPositionPacket(IPAddress adres, UInt16 port);
 
 //wektor trzymaj¹cy pod³¹czonych klientów
 vector<ServerClient> clients;
@@ -102,6 +107,8 @@ string odebrane;
 //atrybuty odebranych danych
 size_t bytesLength, phrasesPosition;
 
+bool _wyslanoPlay = false;
+
 int main()
 {
 	//blokowanie socketa...???
@@ -129,11 +136,15 @@ int main()
 		//jeœli przy³¹czono 2 graczy to rozeœlij ¿e gramy
 		if (clients.size() == 2) 
 		{
-			pakiet.clear();
-			pakiet["typ"] = Typ::START;
-			odebrane = writer.write(pakiet);
-			sendToAllClients( const_cast<char*>( odebrane.c_str()) );
-			//std::cout << "PLAY\n";
+			if (!_wyslanoPlay)
+			{
+				pakiet.clear();
+				pakiet["typ"] = Typ::START;
+				odebrane = writer.write(pakiet);
+				sendToAllClients(const_cast<char*>(odebrane.c_str()));
+				std::cout << "PLAY\n";
+				_wyslanoPlay = true;
+			}
 		}
 		else
 		{
@@ -141,6 +152,7 @@ int main()
 			pakiet["typ"] = Typ::STOP;
 			odebrane = writer.write(pakiet);
 			sendToAllClients(const_cast<char*>( odebrane.c_str()) );
+			_wyslanoPlay = false;
 		}
 
 	}
@@ -171,6 +183,7 @@ void receiveMessages()
 			{
 				std::cout << "New Client connected\n";
 				addNewClient(ipClient, portClient);
+
 				std::cout << "Count of clients: " << clients.size() << "\n";
 				break;
 			}
@@ -185,8 +198,9 @@ void receiveMessages()
 
 			case Typ::POS:
 			{
-				std::cout << "Packet with position\n";
+				//std::cout << "Packet with position:"<< pakiet.get("id", -1).asInt() <<"\n";
 				//rozeœlij otrzyman¹ pozycje do reszty
+				broadcastPositionPacket(ipClient, portClient);
 				break;
 			}
 			
@@ -239,6 +253,25 @@ void receiveMessages()
 		*/
 
 		//tutaj odbiór kolejnych komunikatów....
+	}
+}
+
+void broadcastPositionPacket(IPAddress adres, UInt16 port)
+{
+	if (clients.size() > 0)
+	{
+		for (vector<ServerClient>::iterator it = clients.begin(); it != clients.end(); it++)
+		{
+			// ma nie odsy³aæ tego samego pakietu do klienta który go wys³a³, ale nie wysy³a go wcale
+			//if (it->address != adres && it->port != port)
+			//{
+				//std::cout << it->address.toString() << ":" << it->port << "\n";
+				if (socket.send(odebrane.c_str(), odebrane.length(), it->address, it->port) != Socket::Done)
+				{
+					cout << "Cannot send position packet to " << it->address.toString() << ":" << it->port << "\n";
+				}
+			//}
+		}
 	}
 }
 
@@ -309,8 +342,32 @@ void sendToAllClients(char* msg)
 //dodaje nowego klienta do wektora
 void addNewClient(IPAddress adres, UInt16 port)
 {
-	clients.push_back(ServerClient(adres, port));
-	cout << "New client is added.\n";
+	pakiet.clear();
+
+	if (clients.size() <= 0)
+	{
+		clients.push_back(ServerClient(adres, port, true));
+		pakiet["typ"] = Typ::MASTER;
+		std::cout << "MASTER FOUND\n";
+	}
+	else
+	{
+		clients.push_back(ServerClient(adres, port));
+		std::cout << "NOT master\n";
+		pakiet["typ"] = Typ::NOTMASTER;
+	}
+
+	std::cout << "ID: " << clients.size() << "\n";
+	pakiet["id"] = clients.size();
+	
+	odebrane = writer.write(pakiet);
+	std::cout << odebrane << "\n";
+	if (socket.send(odebrane.c_str(), odebrane.length(), adres, port) != Socket::Done)
+	{
+		std::cout << "Error: failed to send Master Packet\n";
+	}
+
+	std::cout << "New client is added.\n";
 }
 
 //usuwa clienta z wektora

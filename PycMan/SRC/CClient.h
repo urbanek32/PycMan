@@ -15,12 +15,13 @@ enum Typ
 {
 	UNKNOWN = -1,
 	ENTER, LEAVE, POS, START, STOP,
-	SPECIAL = 10, PINGREQUEST, PONGRESPONSE
+	SPECIAL = 10, PINGREQUEST, PONGRESPONSE, 
+	MASTER = 20, NOTMASTER, MASTERLEFT
 };
 
 class CClient : public TSingleton<CClient>
 {
-private:
+public:
 	//socket klienta
 	UDP_Socket socket;
 
@@ -58,6 +59,14 @@ private:
 	Json::Value m_pakiet;
 	//do zapisywania w formacie JSON
 	Json::FastWriter m_writer;
+
+	//czy jesteœmy masterem
+	bool m_master;
+	//nasze ID na serwerze
+	int m_clientID;
+
+
+	sf::Thread *m_th;
 	
 public:
 	
@@ -75,6 +84,13 @@ public:
 
 	Json::Value getReceivedPacket();
 	Typ typeOfReceivedMessage();
+
+	//czy to nasz klient jest g³ówno-dowodz¹cym gr¹
+	bool isMasterClient();
+
+	void collectPackets();
+
+	int getClientID();
 };
 #endif
 

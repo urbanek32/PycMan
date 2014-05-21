@@ -16,6 +16,7 @@ void CClient::initClient(const string nick, const UInt16 serverPort, const IPAdd
 	connectedToServer = false;
 	ready = false;
 	isWaitingForPingReply = false;
+	m_typ = (Typ)666;
 
 	this->nickClient = nick;
 	this->serverPort = serverPort;
@@ -27,32 +28,16 @@ void CClient::initClient(const string nick, const UInt16 serverPort, const IPAdd
 		ready = true;
 		socket.setBlocking(false);
 	}	
+
+	m_th = new sf::Thread(&CClient::collectPackets, this);
+	
 }
 
 bool CClient::isServerReady(double time)
 {
 	double t1, t2 = 0;
 
-	/*if (socket.send(PINGSENDCOMMAND, strlen(PINGSENDCOMMAND), *serverIP, serverPort) == Socket::Done)
-	{
-		t1 = m_timer.getElapsedTime().asSeconds();
-		while (t2 - t1 < time)
-		{
-			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
-			{
-				odebrane = data; //niejawne rzutowanie na stringa
-				if (phrasesPosition = odebrane.find(PINGRECEIVECOMMAND) != string::npos)
-				{
-					serverOn = true;
-					return true;
-				}
-			}
-			t2 = m_timer.getElapsedTime().asSeconds();
-		}
-		serverOn = false;
-		return false;
-	}
-	else return false;*/
+	//std::cout << "isServerReady\n";
 
 	m_pakiet.clear();
 	m_pakiet["typ"] = Typ::PINGREQUEST;
@@ -77,6 +62,7 @@ bool CClient::isServerReady(double time)
 
 				if (m_typ == Typ::PONGRESPONSE)
 				{
+					//std::cout << "PONG RESPONSE\n";
 					serverOn = true;
 					return true;
 				}
@@ -103,6 +89,40 @@ bool CClient::enterToServer()
 
 		socket.send(odebrane.c_str(), odebrane.length(), *serverIP, serverPort);
 		connectedToServer = true;
+
+		/*SPRAWDZAM DWA RAZY BO Z JAKIEGOŒ POWODU ZA PIERWSZYM RAZEM NADAL ODBIERA PONGA OD SERWERA*/
+		std::cout << "sprawdzam wiadomosc\n";
+		if (receiveMessage(Typ::MASTER))
+		{
+			m_master = true;
+			std::cout << "Im MASTER\n";
+		}
+		else 
+		{
+			m_master = false;
+			std::cout << "Master already exist\n";
+		}
+		std::cout << typeOfReceivedMessage() << "\n";
+		/*############################################################################################*/
+
+
+		/*SPRAWDZAM DWA RAZY BO Z JAKIEGOŒ POWODU ZA PIERWSZYM RAZEM NADAL ODBIERA PONGA OD SERWERA*/
+		std::cout << "sprawdzam wiadomosc2\n";
+		if (receiveMessage(Typ::MASTER))
+		{
+			m_master = true;
+			std::cout << "Im MASTER\n";
+		}
+		else
+		{
+			m_master = false;
+			std::cout << "Master already exist\n";
+		}
+		std::cout << typeOfReceivedMessage() << "\n";
+		/*############################################################################################*/
+
+		m_clientID = m_pakiet.get("id", -1).asInt();
+
 		return true;
 	}
 	return false;
@@ -126,31 +146,13 @@ bool CClient::leaveServer()
 	return false;
 }
 
-//sprawdza czy otrzymano dan¹ wiadomoœæ
-bool CClient::receiveMessage(string expectedMessage)
-{
-	if (connectedToServer)
-	{
-		if (isServerReady(1))
-		{
-			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
-			{
-				odebrane = data; //niejawne rzutowanie na stringa
-				//std::cout << "\t" << odebrane << "\n";
-				if (phrasesPosition = odebrane.find(expectedMessage) != string::npos) return true; 
-			}
-		}
-	}
-	return false;
-}
-
 //sprawdza czy otrzymano dany typ wiadomosci
 bool CClient::receiveMessage(Typ typ)
 {
 	if (connectedToServer)
 	{
-		if (isServerReady(1))
-		{
+		//if (isServerReady(1))
+		//{
 			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
 			{
 				odebrane = data; //niejawne rzutowanie na stringa
@@ -169,7 +171,7 @@ bool CClient::receiveMessage(Typ typ)
 				else
 					return false;
 			}
-		}
+		//}
 	}
 	return false;
 }
@@ -182,5 +184,40 @@ Typ CClient::typeOfReceivedMessage()
 Json::Value CClient::getReceivedPacket()
 {
 	return m_pakiet;
+}
+
+bool CClient::isMasterClient()
+{
+	return m_master;
+}
+
+int CClient::getClientID()
+{
+	return m_clientID;
+}
+
+void CClient::collectPackets()
+{
+	while (true)
+	{
+		//std::cout << "l";
+		//sf::sleep(sf::milliseconds(500));
+
+		if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
+		{
+			odebrane = data; //niejawne rzutowanie na stringa
+
+			bool _parsingOK = m_reader.parse(odebrane, m_pakiet); // przeczytaj pakiet jako JSON
+
+			if (!_parsingOK)
+			{
+				std::cout << "Failed to parse JSON packet\n" << m_reader.getFormattedErrorMessages();
+			}
+
+			m_typ = static_cast<Typ>(m_pakiet.get("typ", -1).asInt()); // odczytaj typ pakietu i go zapisz
+
+			std::cout << m_typ <<"\n";
+		}
+	}
 }
 

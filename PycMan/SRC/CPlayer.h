@@ -49,6 +49,8 @@ private:
 
 	bool m_CanGo;
 
+	void sendPositionChange(sf::Vector2f newPos, int newDir);
+
 	bool CanTurn(sf::Image& ScreenCapture);
 
 	void Go(sf::Image& ScreenCapture, float & deltaTime);

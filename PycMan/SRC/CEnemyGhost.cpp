@@ -78,9 +78,9 @@ void CEnemyGhost::Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float
 			m_Sprite.setTexture(m_Texture);
 		}
 
-		Go(ScreenCapture, deltaTime);	
+		//Go(ScreenCapture, deltaTime);	
 
-		CanTurn(ScreenCapture);
+		//CanTurn(ScreenCapture);
 	}
 
 	App.draw(m_Sprite);
@@ -330,6 +330,11 @@ void CEnemyGhost::ChooseDirection()
 	
 	m_NowyKierunek = nowy;
 
+}
+
+void CEnemyGhost::setRemotePosition(sf::Vector2f pos)
+{
+	m_Sprite.setPosition(pos);
 }
 
 sf::Sprite & CEnemyGhost::GetSprite()

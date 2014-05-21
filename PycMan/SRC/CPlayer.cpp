@@ -111,6 +111,7 @@ void CPlayer::Go(sf::Image& ScreenCapture, float & deltaTime)
 						m_frameclock.restart();
 					}
 					m_Sprite.move(newPosition);
+					sendPositionChange(m_Sprite.getPosition(), kierunek::LEWO);
 				}
 				else
 					m_Sprite.setPosition(420.f,m_Sprite.getPosition().y);
@@ -147,6 +148,7 @@ void CPlayer::Go(sf::Image& ScreenCapture, float & deltaTime)
 						m_frameclock.restart();
 					}
 					m_Sprite.move(newPosition);
+					sendPositionChange(m_Sprite.getPosition(), kierunek::PRAWO);
 				}
 				else
 					m_Sprite.setPosition(-15.f,m_Sprite.getPosition().y);
@@ -181,8 +183,11 @@ void CPlayer::Go(sf::Image& ScreenCapture, float & deltaTime)
 					m_frameclock.restart();
 				}
 
-				if(m_Sprite.getPosition().x > 15.f || m_Sprite.getPosition().y > 15.f)
+				if (m_Sprite.getPosition().x > 15.f || m_Sprite.getPosition().y > 15.f)
+				{
 					m_Sprite.move(newPosition);
+					sendPositionChange(m_Sprite.getPosition(), kierunek::GORA);
+				}
 			}
 			break;
 		}
@@ -215,12 +220,31 @@ void CPlayer::Go(sf::Image& ScreenCapture, float & deltaTime)
 				}
 
 				if(m_Sprite.getPosition().x > 15.f || m_Sprite.getPosition().y > 15.f)
+				{
 					m_Sprite.move(newPosition);
+					sendPositionChange(m_Sprite.getPosition(), kierunek::DOL);
+				}
 			}
 			break;
 		}
 	}
 	m_CanGo = wynik;
+}
+
+void CPlayer::sendPositionChange(sf::Vector2f newPos, int newDir)
+{
+	std::string dane;
+	gClient.m_pakiet.clear();
+	gClient.m_pakiet["typ"] = Typ::POS;
+	gClient.m_pakiet["id"] = gClient.getClientID();
+	gClient.m_pakiet["pos"]["x"] = newPos.x;
+	gClient.m_pakiet["pos"]["y"] = newPos.y;
+	gClient.m_pakiet["kierunek"] = newDir;
+
+	dane = gClient.m_writer.write(gClient.m_pakiet);
+
+	gClient.socket.send(dane.c_str(), dane.length(), *gClient.serverIP, gClient.serverPort);
+	gClient.m_pakiet.clear();
 }
 
 bool CPlayer::CanTurn(sf::Image& ScreenCapture)

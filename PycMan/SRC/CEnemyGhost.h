@@ -17,6 +17,8 @@ public:
 
 	void SetStartPosition(sf::Vector2f & Position);
 
+	void setRemotePosition(sf::Vector2f pos);
+
 private:
 	sf::Sprite m_Sprite;
 	sf::Texture m_Texture;

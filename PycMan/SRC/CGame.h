@@ -29,6 +29,9 @@ private:
 	
 	
 
+	//uaktualnia pozycje wzglêdem otrzymanego pakietu
+	void changePositions();
+
 	sf::Event m_Event;
 
 	class CMapManager *m_MapMng;

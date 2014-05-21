@@ -49,21 +49,7 @@ int CLobby::Run(sf::RenderWindow & App)
 
 		App.display();
 
-		//podmiana tekstu w zale¿noœci od po³¹czenia siê z serwerem
-// 		if (triedConnect == false)
-// 		{
-// 			if (gClient.enterToServer())
-// 			{
-// 				m_Title.setString("Connected\n to server.\n\nWaiting for\n 4 players...");
-// 				triedConnect = true;
-// 				return 1;
-// 			}
-// 			else
-// 			{
-// 				m_Title.setString("Sorry, but\nYou can not \njoin to server...");
-// 				triedConnect = true;
-// 			}
-// 		}
+
 
 		m_mutex.lock();
 		if (!triedConnect)
@@ -101,10 +87,10 @@ void CLobby::tryConnect()
 		if (gClient.enterToServer())
 		{
 			m_mutex.lock();
-			m_Title.setString("Connected\n to server.\n\nWaiting for\n 4 players...");
+			m_Title.setString("Connected\n to server.\n\nWaiting for\n  players...");
 			m_mutex.unlock();
 			triedConnect = true;
-			
+			std::cout << gClient.socket.getLocalPort() << "\n";
 		}
 		else
 		{

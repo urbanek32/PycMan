@@ -101,11 +101,28 @@ int CGame::Run(sf::RenderWindow & App)
 			m_Init();
 
 		//jeœli server straci klienta i bêdzie mniej ni¿ n graczy
-		if (gClient.receiveMessage(Typ::STOP)) 
+		if (gClient.receiveMessage(Typ::STOP))
 		{
 			RestartGame(true);
 			return 3; 
 		}
+
+		//gdy otrzymano pakiet z pozycj¹
+		if (gClient.receiveMessage(Typ::POS))
+		{
+			if (gClient.m_pakiet.get("id", -1).asInt() != gClient.getClientID())
+			{
+
+				sf::Vector2f p;
+				p.x = gClient.m_pakiet["pos"].get("x", BlinkyPosition.x).asFloat();
+				p.y = gClient.m_pakiet["pos"].get("y", BlinkyPosition.y).asFloat();
+				//std::cout << p.x << " " << p.y << "\n";
+				m_Enemies[0].setRemotePosition(p);
+
+			}
+		}
+		//std::cout << gClient.typeOfReceivedMessage() << "\n";
+
 		// to tutaj przyjdzie wiadomoœæ i trzeba np wróciæ do menu, nowy w¹tek??? nie ogarniam jak go zrobiæ
 		
 		while(App.pollEvent(m_Event))
@@ -232,7 +249,7 @@ int CGame::Run(sf::RenderWindow & App)
 		App.draw(m_FPS);
 
 		// Kolizja gracza z jedzeniem i duszkami
-		CheckCollision(m_MapMng, m_Player);
+		//CheckCollision(m_MapMng, m_Player);
 
 		OtherUpdates(App);
 
