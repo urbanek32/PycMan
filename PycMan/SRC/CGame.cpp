@@ -101,22 +101,24 @@ int CGame::Run(sf::RenderWindow & App)
 			m_Init();
 
 		//jeœli server straci klienta i bêdzie mniej ni¿ n graczy
-		if (gClient.receiveMessage(Typ::STOP))
+		gClient.receiveMessageToVariable();
+		//if (gClient.receiveMessage(Typ::STOP))
+		if (gClient.typeOfReceivedMessage() == Typ::STOP)
 		{
 			RestartGame(true);
 			return 3; 
 		}
 
 		//gdy otrzymano pakiet z pozycj¹
-		if (gClient.receiveMessage(Typ::POS))
+		if (gClient.typeOfReceivedMessage() == Typ::POS)
 		{
+			cout << "POS ";
 			if (gClient.m_pakiet.get("id", -1).asInt() != gClient.getClientID())
 			{
-
 				sf::Vector2f p;
 				p.x = gClient.m_pakiet["pos"].get("x", BlinkyPosition.x).asFloat();
 				p.y = gClient.m_pakiet["pos"].get("y", BlinkyPosition.y).asFloat();
-				//std::cout << p.x << " " << p.y << "\n";
+				std::cout << p.x << " " << p.y << "\n";
 				m_Enemies[0].setRemotePosition(p);
 
 			}

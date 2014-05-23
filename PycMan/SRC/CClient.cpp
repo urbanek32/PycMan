@@ -176,6 +176,28 @@ bool CClient::receiveMessage(Typ typ)
 	return false;
 }
 
+void CClient::receiveMessageToVariable()
+{
+	if (connectedToServer)
+	{
+		
+		if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
+		{
+			odebrane = data; //niejawne rzutowanie na stringa
+
+			bool _parsingOK = m_reader.parse(odebrane, m_pakiet); // przeczytaj pakiet jako JSON
+
+			if (!_parsingOK)
+			{
+				std::cout << "Failed to parse JSON packet\n" << m_reader.getFormattedErrorMessages();
+			}
+
+			m_typ = static_cast<Typ>(m_pakiet.get("typ", -1).asInt()); // odczytaj typ pakietu i go zapisz			
+		}		
+	}
+
+}
+
 Typ CClient::typeOfReceivedMessage()
 {
 	return m_typ;

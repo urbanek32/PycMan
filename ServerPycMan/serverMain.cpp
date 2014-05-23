@@ -198,7 +198,7 @@ void receiveMessages()
 
 			case Typ::POS:
 			{
-				//std::cout << "Packet with position:"<< pakiet.get("id", -1).asInt() <<"\n";
+				std::cout << "Packet with position:"<< pakiet.get("id", -1).asInt() <<"\n";
 				//rozeœlij otrzyman¹ pozycje do reszty
 				broadcastPositionPacket(ipClient, portClient);
 				break;

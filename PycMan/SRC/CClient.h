@@ -81,6 +81,7 @@ public:
 	bool leaveServer();
 	bool receiveMessage(std::string);
 	bool receiveMessage(const Typ);
+	void receiveMessageToVariable();
 
 	Json::Value getReceivedPacket();
 	Typ typeOfReceivedMessage();
