@@ -75,6 +75,8 @@ private:
 
 	void PrepareGame(sf::RenderWindow & App);
 
+	int updateMultiplayerStuff();
+
 	// czy okno z gra jest aktywne
 	bool m_isActive;
 };

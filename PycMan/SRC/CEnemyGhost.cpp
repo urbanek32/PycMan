@@ -27,11 +27,11 @@ CEnemyGhost::CEnemyGhost(const std::string filename, sf::Vector2f StartPosition)
 	m_changeset = 0;
 }
 
-void CEnemyGhost::Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime)
+void CEnemyGhost::Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime, bool _randDirection)
 {
 	if(gameState == Play)
 	{
-		if( m_clock.getElapsedTime().asSeconds() > 2.f || !m_CanGo)
+		if( (m_clock.getElapsedTime().asSeconds() > 2.f || !m_CanGo) && _randDirection)
 		{
 			ChooseDirection();
 			m_clock.restart();
@@ -78,9 +78,9 @@ void CEnemyGhost::Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float
 			m_Sprite.setTexture(m_Texture);
 		}
 
-		//Go(ScreenCapture, deltaTime);	
+		Go(ScreenCapture, deltaTime);	
 
-		//CanTurn(ScreenCapture);
+		CanTurn(ScreenCapture);
 	}
 
 	App.draw(m_Sprite);
@@ -332,9 +332,26 @@ void CEnemyGhost::ChooseDirection()
 
 }
 
-void CEnemyGhost::setRemotePosition(sf::Vector2f pos)
+sf::Vector2f CEnemyGhost::getPosition() const
+{
+	return m_Sprite.getPosition();
+}
+
+sf::Vector2f CEnemyGhost::getDirection() const
+{
+	return m_Direction;
+}
+
+int CEnemyGhost::getKierunek() const
+{
+	return m_kierunek;
+}
+
+void CEnemyGhost::setRemotePosition(sf::Vector2f pos, sf::Vector2f dir, kierunek kier)
 {
 	m_Sprite.setPosition(pos);
+	m_Direction = dir;
+	m_kierunek = kier;
 }
 
 sf::Sprite & CEnemyGhost::GetSprite()

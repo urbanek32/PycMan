@@ -219,3 +219,22 @@ int CClient::getClientID()
 	return m_clientID;
 }
 
+void CClient::sendPacketPos()
+{
+	if (pakietPos.empty())
+	{
+		return;
+	}
+
+	pakietPos["typ"] = Typ::POS;
+	pakietPos["id"] = m_clientID;
+
+	odebrane = m_writer.write(pakietPos);
+
+	if (socket.send(odebrane.c_str(), odebrane.length(), *serverIP, serverPort) != Socket::Done)
+	{
+		std::cout << "PacketPos cannot be send to server\n";
+	}
+
+	pakietPos.clear();
+}

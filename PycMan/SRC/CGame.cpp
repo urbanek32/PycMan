@@ -100,31 +100,17 @@ int CGame::Run(sf::RenderWindow & App)
 		if( !m_Inited )
 			m_Init();
 
-		//jeœli server straci klienta i bêdzie mniej ni¿ n graczy
-		gClient.receiveMessageToVariable();
-		//if (gClient.receiveMessage(Typ::STOP))
-		if (gClient.typeOfReceivedMessage() == Typ::STOP)
+		
+		switch ( updateMultiplayerStuff() )
 		{
-			RestartGame(true);
-			return 3; 
+		case 42:
+			//nic sie nie stalo
+			break;
+
+		case 3:
+			return 3;
+			break;
 		}
-
-		//gdy otrzymano pakiet z pozycj¹
-		if (gClient.typeOfReceivedMessage() == Typ::POS)
-		{
-			//cout << "POS ";
-			if (gClient.m_pakiet.get("id", -1).asInt() != gClient.getClientID())
-			{
-				sf::Vector2f p;
-				p.x = gClient.m_pakiet["pos"].get("x", BlinkyPosition.x).asFloat();
-				p.y = gClient.m_pakiet["pos"].get("y", BlinkyPosition.y).asFloat();
-				//std::cout << p.x << " " << p.y << "\n";
-				m_Enemies[0].setRemotePosition(p);
-
-			}
-		}
-		//std::cout << gClient.typeOfReceivedMessage() << "\n";
-
 		// to tutaj przyjdzie wiadomoœæ i trzeba np wróciæ do menu, nowy w¹tek??? nie ogarniam jak go zrobiæ
 		
 		while(App.pollEvent(m_Event))
@@ -255,6 +241,9 @@ int CGame::Run(sf::RenderWindow & App)
 
 		OtherUpdates(App);
 
+		//wyœlij nasz pakiet na serwer
+		gClient.sendPacketPos();
+
 		// Przygotuj grê
 		if(gameState == Prepare)
 			PrepareGame(App);
@@ -322,6 +311,60 @@ void CGame::m_Init()
 	m_startclock.restart();
 }
 
+// domyœlnie zwracamy 42, czyli nic siê nie dzieje
+int CGame::updateMultiplayerStuff()
+{
+	//jeœli server straci klienta i bêdzie mniej ni¿ n graczy
+	gClient.receiveMessageToVariable();
+	
+	if (gClient.typeOfReceivedMessage() == Typ::STOP)
+	{
+		RestartGame(true);
+		return 3;
+	}
+
+	//gdy otrzymano pakiet z pozycj¹
+	if (gClient.typeOfReceivedMessage() == Typ::POS)
+	{
+		//std::cout << "POS ";
+		if (gClient.m_pakiet.get("id", -1).asInt() != gClient.getClientID())
+		{
+			int kier;
+			sf::Vector2f p, k;
+			p.x = gClient.m_pakiet["pos"].get("x", BlinkyPosition.x).asFloat();
+			p.y = gClient.m_pakiet["pos"].get("y", BlinkyPosition.y).asFloat();
+
+			kier = gClient.m_pakiet.get("kierunek", 0).asInt();
+
+			k.x = gClient.m_pakiet["direction"].get("x", 0.0f).asFloat();
+			k.y = gClient.m_pakiet["direction"].get("y", 0.0f).asFloat();
+			//std::cout << p.x << " " << p.y << "\n";
+			m_Enemies[0].setRemotePosition(p, k, static_cast<kierunek>(kier));
+
+
+			if (!gClient.isMasterClient())
+			{
+				std::string e = "0";
+				for (unsigned int i = 1; i < m_Enemies.size(); i++)
+				{
+					
+					p.x = gClient.m_pakiet["enemies"][e]["pos"].get("x", 0.0f).asFloat();
+					p.y = gClient.m_pakiet["enemies"][e]["pos"].get("y", 0.0f).asFloat();
+					k.x = gClient.m_pakiet["enemies"][e]["dir"].get("x", 0.0f).asFloat();
+					k.y = gClient.m_pakiet["enemies"][e]["dir"].get("y", 0.0f).asFloat();
+					kier = gClient.m_pakiet["enemies"][e].get("kierunek", 0).asInt();
+					
+					m_Enemies[i].setRemotePosition(p, k, static_cast<kierunek>(kier));
+
+					_itoa(i, const_cast<char*>(e.c_str()), 10);
+				}
+			}
+
+		}
+	}
+	return 42;
+}
+
 void CGame::m_CaptureScreen(sf::RenderWindow & App)
 {
 	m_ScreenCapture = App.capture();
@@ -330,9 +373,22 @@ void CGame::m_CaptureScreen(sf::RenderWindow & App)
 
 void CGame::UpdateEnemies(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime)
 {
-	for(vector<class CEnemyGhost>::iterator it = m_Enemies.begin(); it != m_Enemies.end(); it++)
+	std::string e = "0";
+
+	for (unsigned int i = 0; i < m_Enemies.size(); i++)
 	{
-		it->Update(App,ScreenCapture, deltaTime);
+		m_Enemies[i].Update(App,ScreenCapture, deltaTime, gClient.isMasterClient());
+
+		if (gClient.isMasterClient())
+		{
+			gClient.pakietPos["enemies"][e]["pos"]["x"] = m_Enemies[i].getPosition().x;
+			gClient.pakietPos["enemies"][e]["pos"]["y"] = m_Enemies[i].getPosition().y;
+			gClient.pakietPos["enemies"][e]["dir"]["x"] = m_Enemies[i].getDirection().x;
+			gClient.pakietPos["enemies"][e]["dir"]["y"] = m_Enemies[i].getDirection().y;
+			gClient.pakietPos["enemies"][e]["kierunek"] = m_Enemies[i].getKierunek();
+		}
+
+		_itoa(i, const_cast<char*>(e.c_str()), 10);
 	}
 }
 

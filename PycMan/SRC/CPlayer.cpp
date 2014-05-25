@@ -233,18 +233,15 @@ void CPlayer::Go(sf::Image& ScreenCapture, float & deltaTime)
 
 void CPlayer::sendPositionChange(sf::Vector2f newPos, int newDir)
 {
-	std::string dane;
-	gClient.m_pakiet.clear();
-	gClient.m_pakiet["typ"] = Typ::POS;
-	gClient.m_pakiet["id"] = gClient.getClientID();
-	gClient.m_pakiet["pos"]["x"] = newPos.x;
-	gClient.m_pakiet["pos"]["y"] = newPos.y;
-	gClient.m_pakiet["kierunek"] = newDir;
+	gClient.pakietPos["pos"]["x"] = newPos.x;
+	gClient.pakietPos["pos"]["y"] = newPos.y;
 
-	dane = gClient.m_writer.write(gClient.m_pakiet);
+	gClient.pakietPos["kierunek"] = newDir;
 
-	gClient.socket.send(dane.c_str(), dane.length(), *gClient.serverIP, gClient.serverPort);
-	gClient.m_pakiet.clear();
+	gClient.pakietPos["direction"]["x"] = m_Direction.x;
+	gClient.pakietPos["direction"]["y"] = m_Direction.y;
+
+
 }
 
 bool CPlayer::CanTurn(sf::Image& ScreenCapture)

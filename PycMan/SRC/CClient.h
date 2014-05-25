@@ -56,7 +56,7 @@ public:
 	//do czytania w formacie JSON
 	Json::Reader m_reader;
 	//pakiet w formacie JSON
-	Json::Value m_pakiet;
+	Json::Value m_pakiet, pakietPos;
 	//do zapisywania w formacie JSON
 	Json::FastWriter m_writer;
 
@@ -87,6 +87,9 @@ public:
 	bool isMasterClient();
 
 	int getClientID();
+
+	//wysy³a pakietPos do serwera
+	void sendPacketPos();
 };
 #endif
 

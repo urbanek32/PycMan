@@ -9,7 +9,7 @@ public:
 
 	CEnemyGhost(const std::string filename, sf::Vector2f StartPosition);
 
-	void Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime);
+	void Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime, bool _randDirection = true);
 
 	sf::Sprite & GetSprite();
 
@@ -17,7 +17,11 @@ public:
 
 	void SetStartPosition(sf::Vector2f & Position);
 
-	void setRemotePosition(sf::Vector2f pos);
+	void setRemotePosition(sf::Vector2f pos, sf::Vector2f dir, kierunek kier =  kierunek::LEWO);
+
+	sf::Vector2f getPosition() const;
+	sf::Vector2f getDirection() const;
+	int getKierunek() const;
 
 private:
 	sf::Sprite m_Sprite;
