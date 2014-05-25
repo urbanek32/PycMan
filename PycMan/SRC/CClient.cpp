@@ -16,7 +16,7 @@ void CClient::initClient(const string nick, const UInt16 serverPort, const IPAdd
 	connectedToServer = false;
 	ready = false;
 	isWaitingForPingReply = false;
-	m_typ = (Typ)666;
+	m_typ = Typ::UNKNOWN;
 
 	this->nickClient = nick;
 	this->serverPort = serverPort;
@@ -28,9 +28,6 @@ void CClient::initClient(const string nick, const UInt16 serverPort, const IPAdd
 		ready = true;
 		socket.setBlocking(false);
 	}	
-
-	m_th = new sf::Thread(&CClient::collectPackets, this);
-	
 }
 
 bool CClient::isServerReady(double time)
@@ -193,7 +190,11 @@ void CClient::receiveMessageToVariable()
 			}
 
 			m_typ = static_cast<Typ>(m_pakiet.get("typ", -1).asInt()); // odczytaj typ pakietu i go zapisz			
-		}		
+		}
+		else
+		{
+			m_typ = Typ::UNKNOWN; // nic nie odebrano, wiêc badziew
+		}
 	}
 
 }
@@ -216,30 +217,5 @@ bool CClient::isMasterClient()
 int CClient::getClientID()
 {
 	return m_clientID;
-}
-
-void CClient::collectPackets()
-{
-	while (true)
-	{
-		//std::cout << "l";
-		//sf::sleep(sf::milliseconds(500));
-
-		if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
-		{
-			odebrane = data; //niejawne rzutowanie na stringa
-
-			bool _parsingOK = m_reader.parse(odebrane, m_pakiet); // przeczytaj pakiet jako JSON
-
-			if (!_parsingOK)
-			{
-				std::cout << "Failed to parse JSON packet\n" << m_reader.getFormattedErrorMessages();
-			}
-
-			m_typ = static_cast<Typ>(m_pakiet.get("typ", -1).asInt()); // odczytaj typ pakietu i go zapisz
-
-			std::cout << m_typ <<"\n";
-		}
-	}
 }
 

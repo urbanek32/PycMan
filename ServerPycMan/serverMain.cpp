@@ -33,10 +33,10 @@ public:
 
 	ServerClient(){}
 
-	ServerClient(IPAddress address, UInt16 port, bool _isMaster = false)
+	ServerClient(IPAddress _address, UInt16 _port, bool _isMaster = false)
 	{
-		this->address = address;
-		this->port = port;
+		this->address = _address;
+		this->port = _port;
 		this->isAlive = true;
 		this->isMaster = _isMaster;
 	}	
@@ -225,32 +225,6 @@ void receiveMessages()
 			}
 		}
 
-		/*
-		//Je¿eli fraza b¹dŸ znak nie zosta³ odnaleziony w przeszukiwanym tekœcie 
-		//to wówczas metoda find zwraca wartoœæ std::string::npos
-		if (phrasesPosition = odebrane.find(ENTERCOMMAND) != string::npos)
-		{
-			std::cout << "New Client connected.\t" << odebrane.erase(phrasesPosition - 1, strlen(ENTERCOMMAND)) << "\n";
-			addNewClient(ipClient, portClient);
-			cout << "Count of clients: " << clients.size() << "\n";
-		}
-		else if (phrasesPosition = odebrane.find(LEFTCOMMAND) != string::npos)
-		{
-			std::cout << "Client left server:\t" << odebrane.erase(phrasesPosition - 1, strlen(LEFTCOMMAND)) << "\n";
-			deleteClient(ipClient, portClient);
-			cout << "Count of clients: " << clients.size() << "\n";
-		}
-		else if (phrasesPosition = odebrane.find(PINGSENDCOMMAND) != string::npos)
-		{
-			//std::cout << "Received ping..." << "\n";
-			replyToPing(ipClient, portClient);
-		}
-		else if (phrasesPosition = odebrane.find(PINGRECEIVECOMMAND) != string::npos)
-		{
-			std::cout << "Received respons to ping..." << "\n";
-			receiveReplyToPing(ipClient, portClient);
-		}
-		*/
 
 		//tutaj odbiór kolejnych komunikatów....
 	}
@@ -263,14 +237,16 @@ void broadcastPositionPacket(IPAddress adres, UInt16 port)
 		for (vector<ServerClient>::iterator it = clients.begin(); it != clients.end(); it++)
 		{
 			// ma nie odsy³aæ tego samego pakietu do klienta który go wys³a³, ale nie wysy³a go wcale
-			//if (it->address != adres && it->port != port)
-			//{
-				//std::cout << it->address.toString() << ":" << it->port << "\n";
+			//std::cout << it->address.toString() << "\t" << adres.toString() << "\n";
+			//std::cout << it->port << "\t" << port << "\n";
+			if ( it->port != port)
+			{
+				std::cout << it->address.toString() << ":" << it->port << "\n";
 				if (socket.send(odebrane.c_str(), odebrane.length(), it->address, it->port) != Socket::Done)
 				{
 					cout << "Cannot send position packet to " << it->address.toString() << ":" << it->port << "\n";
 				}
-			//}
+			}
 		}
 	}
 }
@@ -359,7 +335,7 @@ void addNewClient(IPAddress adres, UInt16 port)
 
 	std::cout << "ID: " << clients.size() << "\n";
 	pakiet["id"] = clients.size();
-	
+
 	odebrane = writer.write(pakiet);
 	std::cout << odebrane << "\n";
 	if (socket.send(odebrane.c_str(), odebrane.length(), adres, port) != Socket::Done)
@@ -368,6 +344,7 @@ void addNewClient(IPAddress adres, UInt16 port)
 	}
 
 	std::cout << "New client is added.\n";
+	//std::cout << clients.back().address.toString() << ":" << clients.back().port << "\n\n";
 }
 
 //usuwa clienta z wektora

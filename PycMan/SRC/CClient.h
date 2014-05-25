@@ -64,9 +64,6 @@ public:
 	bool m_master;
 	//nasze ID na serwerze
 	int m_clientID;
-
-
-	sf::Thread *m_th;
 	
 public:
 	
@@ -88,8 +85,6 @@ public:
 
 	//czy to nasz klient jest g³ówno-dowodz¹cym gr¹
 	bool isMasterClient();
-
-	void collectPackets();
 
 	int getClientID();
 };

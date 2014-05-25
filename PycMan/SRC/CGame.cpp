@@ -112,13 +112,13 @@ int CGame::Run(sf::RenderWindow & App)
 		//gdy otrzymano pakiet z pozycj¹
 		if (gClient.typeOfReceivedMessage() == Typ::POS)
 		{
-			cout << "POS ";
+			//cout << "POS ";
 			if (gClient.m_pakiet.get("id", -1).asInt() != gClient.getClientID())
 			{
 				sf::Vector2f p;
 				p.x = gClient.m_pakiet["pos"].get("x", BlinkyPosition.x).asFloat();
 				p.y = gClient.m_pakiet["pos"].get("y", BlinkyPosition.y).asFloat();
-				std::cout << p.x << " " << p.y << "\n";
+				//std::cout << p.x << " " << p.y << "\n";
 				m_Enemies[0].setRemotePosition(p);
 
 			}
