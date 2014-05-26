@@ -149,6 +149,10 @@ int CGame::Run(sf::RenderWindow & App)
 				m_Enemies[1].SetStartPosition(ClydePosition);
 				m_Enemies[2].SetStartPosition(InkeyPosition);
 				m_Enemies[3].SetStartPosition(PinkyPosition);
+				//nowe
+				m_Enemies[4].SetStartPosition(KalibuPosition);
+				m_Enemies[5].SetStartPosition(YetiPosition);
+
 				m_Player->SetStartPosition(PlayerPosition);
 
 				m_Captured = false;
@@ -296,6 +300,11 @@ void CGame::m_Init()
 	m_Enemies.push_back(*duch3);
 	CEnemyGhost *duch4 = new CEnemyGhost("DATA/PinkyALL.bmp", PinkyPosition);
 	m_Enemies.push_back(*duch4);
+	//nowe
+	CEnemyGhost *duch5 = new CEnemyGhost("DATA/PinkyALL.bmp", KalibuPosition);
+	m_Enemies.push_back(*duch5);
+	CEnemyGhost *duch6 = new CEnemyGhost("DATA/InkeyALL.bmp", YetiPosition);
+	m_Enemies.push_back(*duch6);
 
 
 	m_overShape.setSize(sf::Vector2f(200,150));
@@ -339,13 +348,13 @@ int CGame::updateMultiplayerStuff()
 			k.x = gClient.m_pakiet["direction"].get("x", 0.0f).asFloat();
 			k.y = gClient.m_pakiet["direction"].get("y", 0.0f).asFloat();
 			//std::cout << p.x << " " << p.y << "\n";
-			m_Enemies[0].setRemotePosition(p, k, static_cast<kierunek>(kier));
+			//m_Enemies[0].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
 
 			if (!gClient.isMasterClient())
 			{
 				std::string e = "0";
-				for (unsigned int i = 1; i < m_Enemies.size(); i++)
+				for (unsigned int i = 0; i < m_Enemies.size(); i++)
 				{
 					
 					p.x = gClient.m_pakiet["enemies"][e]["pos"].get("x", 0.0f).asFloat();
@@ -473,6 +482,9 @@ void CGame::RestartPositions()
 	m_Enemies[1].ResetPosition();
 	m_Enemies[2].ResetPosition();
 	m_Enemies[3].ResetPosition();
+	//nowy
+	m_Enemies[4].ResetPosition();
+	m_Enemies[5].ResetPosition();
 	
 }
 
@@ -527,6 +539,9 @@ void CGame::RestartGame(bool ResetScore)
 	m_Enemies[1].SetStartPosition(ClydePosition);
 	m_Enemies[2].SetStartPosition(InkeyPosition);
 	m_Enemies[3].SetStartPosition(PinkyPosition);
+	//nowe
+	m_Enemies[4].SetStartPosition(KalibuPosition);
+	m_Enemies[5].SetStartPosition(YetiPosition);
 
 	m_Player->SetStartPosition(PlayerPosition);
 

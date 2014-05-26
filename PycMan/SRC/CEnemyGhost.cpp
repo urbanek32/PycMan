@@ -1,6 +1,6 @@
 #include "headers.h"
 
-sf::Vector2f BlinkyPosition, ClydePosition, InkeyPosition, PinkyPosition;
+sf::Vector2f BlinkyPosition, ClydePosition, InkeyPosition, PinkyPosition, KalibuPosition, YetiPosition;
 
 CEnemyGhost::CEnemyGhost()
 {

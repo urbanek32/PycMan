@@ -238,6 +238,19 @@ void CMapManager::LoadMap(const string filepath)
 					ClydePosition.y = center.y;
 					break;
 				}
+				//nowe
+				case 'K':
+				{
+							KalibuPosition.x = center.x;
+							KalibuPosition.y = center.y;
+							break;
+				}
+				case 'Y':
+				{
+							YetiPosition.x = center.x;
+							YetiPosition.y = center.y;
+							break;
+				}
 	
 			}// end switch
 			

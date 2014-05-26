@@ -49,5 +49,5 @@ private:
 
 	int m_currentframe, m_changeset;
 };
-extern sf::Vector2f BlinkyPosition, ClydePosition, InkeyPosition, PinkyPosition;
+extern sf::Vector2f BlinkyPosition, ClydePosition, InkeyPosition, PinkyPosition, KalibuPosition, YetiPosition;
 #endif
