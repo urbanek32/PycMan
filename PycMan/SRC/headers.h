@@ -18,6 +18,7 @@ using namespace std;
 #include <cmath>
 #include <functional>
 #include <Windows.h>
+#include <assert.h>
 
 // Sieciowe
 #include <UDP_Socket.h>

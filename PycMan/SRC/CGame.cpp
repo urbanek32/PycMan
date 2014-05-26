@@ -145,13 +145,10 @@ int CGame::Run(sf::RenderWindow & App)
 				style << "DATA/level" << m_LevelNumer << ".txt";
 				m_MapMng->LoadMap(style.str());
 
-				m_Enemies[0].SetStartPosition(BlinkyPosition);
-				m_Enemies[1].SetStartPosition(ClydePosition);
-				m_Enemies[2].SetStartPosition(InkeyPosition);
-				m_Enemies[3].SetStartPosition(PinkyPosition);
-				//nowe
-				m_Enemies[4].SetStartPosition(KalibuPosition);
-				m_Enemies[5].SetStartPosition(YetiPosition);
+				for (unsigned int i = 0; i < m_Enemies.size(); i++)
+				{
+					m_Enemies[i].SetStartPosition(enemyStartPositions[i]);
+				}
 
 				m_Player->SetStartPosition(PlayerPosition);
 
@@ -292,20 +289,35 @@ void CGame::m_Init()
 	m_TGameOver.setString("Game Over\nZakoñczyæ grê?\nT / N");
 	m_TQuit.setString("Quit?\nT / N");
 
-	CEnemyGhost *duch = new CEnemyGhost("DATA/BlinkyALL.bmp", BlinkyPosition);
+	CEnemyGhost *duch = new CEnemyGhost("DATA/BlinkyALL.bmp", enemyStartPositions[0]);
 	m_Enemies.push_back(*duch);
-	CEnemyGhost *duch2 = new CEnemyGhost("DATA/ClydeALL.bmp", ClydePosition);
+	CEnemyGhost *duch2 = new CEnemyGhost("DATA/ClydeALL.bmp", enemyStartPositions[1]);
 	m_Enemies.push_back(*duch2);
-	CEnemyGhost *duch3 = new CEnemyGhost("DATA/InkeyALL.bmp", InkeyPosition);
+	CEnemyGhost *duch3 = new CEnemyGhost("DATA/InkeyALL.bmp", enemyStartPositions[2]);
 	m_Enemies.push_back(*duch3);
-	CEnemyGhost *duch4 = new CEnemyGhost("DATA/PinkyALL.bmp", PinkyPosition);
+	CEnemyGhost *duch4 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[3]);
 	m_Enemies.push_back(*duch4);
+	
+	
 	//nowe
-	CEnemyGhost *duch5 = new CEnemyGhost("DATA/PinkyALL.bmp", KalibuPosition);
+	CEnemyGhost *duch5 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[4]);
 	m_Enemies.push_back(*duch5);
-	CEnemyGhost *duch6 = new CEnemyGhost("DATA/InkeyALL.bmp", YetiPosition);
+	CEnemyGhost *duch6 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[5]);
 	m_Enemies.push_back(*duch6);
+	CEnemyGhost *duch7 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[6]);
+	m_Enemies.push_back(*duch7);
+	CEnemyGhost *duch8 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[7]);
+	m_Enemies.push_back(*duch8);
+	CEnemyGhost *duch9 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[8]);
+	m_Enemies.push_back(*duch9);
+	CEnemyGhost *duch10 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[9]);
+	m_Enemies.push_back(*duch10);
+	/*CEnemyGhost *duch11 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[10]);
+	m_Enemies.push_back(*duch11);*/
+	
 
+	// wywali siê jak jest wiêcej wrogów ni¿ pozycji startowych
+	assert(m_Enemies.size() <= enemyStartPositions.size());
 
 	m_overShape.setSize(sf::Vector2f(200,150));
 	m_overShape.setPosition(120,220);
@@ -478,13 +490,10 @@ void CGame::RestartPositions()
 {
 	m_Player->RestartPosition();
 	
-	m_Enemies[0].ResetPosition();
-	m_Enemies[1].ResetPosition();
-	m_Enemies[2].ResetPosition();
-	m_Enemies[3].ResetPosition();
-	//nowy
-	m_Enemies[4].ResetPosition();
-	m_Enemies[5].ResetPosition();
+	for (unsigned int i = 0; i < m_Enemies.size(); i++)
+	{
+		m_Enemies[i].ResetPosition();
+	}
 	
 }
 
@@ -535,13 +544,11 @@ void CGame::RestartGame(bool ResetScore)
 
 	m_MapMng->LoadMap("DATA/level1.txt");
 
-	m_Enemies[0].SetStartPosition(BlinkyPosition);
-	m_Enemies[1].SetStartPosition(ClydePosition);
-	m_Enemies[2].SetStartPosition(InkeyPosition);
-	m_Enemies[3].SetStartPosition(PinkyPosition);
-	//nowe
-	m_Enemies[4].SetStartPosition(KalibuPosition);
-	m_Enemies[5].SetStartPosition(YetiPosition);
+	for (unsigned int i = 0; i < m_Enemies.size(); i++)
+	{
+		m_Enemies[i].SetStartPosition(enemyStartPositions[i]);
+	}
+
 
 	m_Player->SetStartPosition(PlayerPosition);
 

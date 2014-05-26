@@ -22,11 +22,6 @@ CMapManager::CMapManager()
 
 void CMapManager::DrawMap(sf::RenderWindow & App)
 {
-	/*for(unsigned int i=0; i< m_Walls.size(); i++)
-	{
-		App.draw( m_Walls[i] );
-	}*/
-
 	//rysuje teksture œcian
 	App.draw(m_spriteWalls);
 
@@ -214,42 +209,10 @@ void CMapManager::LoadMap(const string filepath)
 					PlayerPosition.y = center.y;
 					break;
 				}
-				case 'B':
+				case '*':
 				{
-					BlinkyPosition.x = center.x;
-					BlinkyPosition.y = center.y;
+					enemyStartPositions.push_back(center);
 					break;
-				}
-				case 'I':
-				{
-					InkeyPosition.x = center.x;
-					InkeyPosition.y = center.y;
-					break;
-				}
-				case 'N':
-				{
-					PinkyPosition.x = center.x;
-					PinkyPosition.y = center.y;
-					break;
-				}
-				case 'C':
-				{
-					ClydePosition.x = center.x;
-					ClydePosition.y = center.y;
-					break;
-				}
-				//nowe
-				case 'K':
-				{
-							KalibuPosition.x = center.x;
-							KalibuPosition.y = center.y;
-							break;
-				}
-				case 'Y':
-				{
-							YetiPosition.x = center.x;
-							YetiPosition.y = center.y;
-							break;
 				}
 	
 			}// end switch
