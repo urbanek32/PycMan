@@ -277,7 +277,7 @@ int CGame::Run(sf::RenderWindow & App)
 	} // while(running)
 	return (-1);
 }
-
+int ile = 0;
 void CGame::m_Init()
 {
 	m_MapMng = new CMapManager();
@@ -362,7 +362,7 @@ int CGame::updateMultiplayerStuff()
 	//gdy otrzymano pakiet z pozycj¹
 	if (gClient.typeOfReceivedMessage() == Typ::POS)
 	{
-		
+		cout << "Dostalem pakiet ile = "<<ile++ << endl;
 		int _id = gClient.m_pakiet.get("id", -1).asInt();
 
 		//syfny pakiet

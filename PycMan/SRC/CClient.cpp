@@ -88,23 +88,30 @@ bool CClient::enterToServer()
 		connectedToServer = true;
 
 		/*SPRAWDZAM DWA RAZY BO Z JAKIEGOŒ POWODU ZA PIERWSZYM RAZEM NADAL ODBIERA PONGA OD SERWERA*/
-		std::cout << "sprawdzam wiadomosc\n";
-		if (receiveMessage(Typ::MASTER))
+		
+		while (true)
 		{
-			m_master = true;
-			std::cout << "Im MASTER\n";
+			if (receiveMessage(Typ::MASTER))
+			{
+				m_master = true;
+				std::cout << "Im MASTER\n";
+				break;
+			}
+			if (typeOfReceivedMessage() == Typ::NOTMASTER)
+			{
+				m_master = false;
+				std::cout << "Master already exist\n";
+				break;
+			}
 		}
-		else 
-		{
-			m_master = false;
-			std::cout << "Master already exist\n";
-		}
+		std::cout << "sprawdzam wiadomosc\n";		
+		
 		std::cout << typeOfReceivedMessage() << "\n";
 		/*############################################################################################*/
 
 
 		/*SPRAWDZAM DWA RAZY BO Z JAKIEGOŒ POWODU ZA PIERWSZYM RAZEM NADAL ODBIERA PONGA OD SERWERA*/
-		std::cout << "sprawdzam wiadomosc2\n";
+		/*std::cout << "sprawdzam wiadomosc2\n";
 		if (receiveMessage(Typ::MASTER))
 		{
 			m_master = true;
@@ -115,7 +122,7 @@ bool CClient::enterToServer()
 			m_master = false;
 			std::cout << "Master already exist\n";
 		}
-		std::cout << typeOfReceivedMessage() << "\n";
+		std::cout << typeOfReceivedMessage() << "\n";*/
 		/*############################################################################################*/
 
 		m_clientID = m_pakiet.get("id", -1).asInt();
