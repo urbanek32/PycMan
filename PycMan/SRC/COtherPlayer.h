@@ -8,7 +8,7 @@ class COtherPlayer
 public:
 	COtherPlayer();
 
-	COtherPlayer(const std::string filename, sf::Vector2f StartPosition);
+	COtherPlayer(const std::string filename, sf::Vector2f StartPosition, sf::Color color);
 
 	sf::Sprite & GetSprite();
 

@@ -298,8 +298,12 @@ void CGame::m_Init()
 	m_TQuit.setString("Quit?\nT / N");
 
 	//tworzê nowych graczy
-	COtherPlayer *subPlayer1 = new COtherPlayer("DATA/pacmanALL2.bmp", otherPlayersStartPositions[0]);
+	COtherPlayer *subPlayer1 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color::Red);
 	m_OtherPlayers.push_back(*subPlayer1);
+	COtherPlayer *subPlayer2 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color::Green);
+	m_OtherPlayers.push_back(*subPlayer2);
+	COtherPlayer *subPlayer3 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color(255,150,0));
+	m_OtherPlayers.push_back(*subPlayer3);
 
 	//duchy
 	CEnemyGhost *duch = new CEnemyGhost("DATA/BlinkyALL.bmp", enemyStartPositions[0]);
@@ -358,33 +362,43 @@ int CGame::updateMultiplayerStuff()
 	//gdy otrzymano pakiet z pozycj¹
 	if (gClient.typeOfReceivedMessage() == Typ::POS)
 	{
-		//std::cout << "POS ";
-		if (gClient.m_pakiet.get("id", -1).asInt() != gClient.getClientID())
+		
+		int _id = gClient.m_pakiet.get("id", -1).asInt();
+
+		//syfny pakiet
+		if (_id == -1)
+			return 42;
+
+		//na wypadek gdybyœmy odebrali swój w³asny pakiet
+		if (_id != gClient.getClientID())
 		{
+			_id--;
 			int kier;
 			sf::Vector2f p, k;
-			p.x = gClient.m_pakiet["pos"].get("x", otherPlayersStartPositions[0].x).asFloat();
-			p.y = gClient.m_pakiet["pos"].get("y", otherPlayersStartPositions[0].y).asFloat();
+			p.x = gClient.m_pakiet["pos"].get("x", m_OtherPlayers[_id].getPosition().x).asFloat();
+			p.y = gClient.m_pakiet["pos"].get("y", m_OtherPlayers[_id].getPosition().y).asFloat();
 
-			kier = gClient.m_pakiet.get("kierunek", 0).asInt();
+			kier = gClient.m_pakiet.get("kierunek", m_OtherPlayers[_id].getKierunek()).asInt();
 
-			k.x = gClient.m_pakiet["direction"].get("x", 0.0f).asFloat();
-			k.y = gClient.m_pakiet["direction"].get("y", 0.0f).asFloat();
+			k.x = gClient.m_pakiet["direction"].get("x", m_OtherPlayers[_id].getDirection().x).asFloat();
+			k.y = gClient.m_pakiet["direction"].get("y", m_OtherPlayers[_id].getDirection().y).asFloat();
 			std::cout << p.x << " " << p.y << "\n";
-			m_OtherPlayers[0].setRemotePosition(p, k, static_cast<kierunek>(kier));
+			m_OtherPlayers[_id].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
 
+			//jako klient wyci¹gamy jeszcze pozycje duszków
 			if (!gClient.isMasterClient())
 			{
 				std::string e = "0";
 				for (unsigned int i = 0; i < m_Enemies.size(); i++)
 				{
 					
-					p.x = gClient.m_pakiet["enemies"][e]["pos"].get("x", 0.0f).asFloat();
-					p.y = gClient.m_pakiet["enemies"][e]["pos"].get("y", 0.0f).asFloat();
-					k.x = gClient.m_pakiet["enemies"][e]["dir"].get("x", 0.0f).asFloat();
-					k.y = gClient.m_pakiet["enemies"][e]["dir"].get("y", 0.0f).asFloat();
-					kier = gClient.m_pakiet["enemies"][e].get("kierunek", 0).asInt();
+
+					p.x = gClient.m_pakiet["enemies"][e]["pos"].get("x", m_Enemies[i].getPosition().x).asFloat();
+					p.y = gClient.m_pakiet["enemies"][e]["pos"].get("y", m_Enemies[i].getPosition().y).asFloat();
+					k.x = gClient.m_pakiet["enemies"][e]["dir"].get("x", m_Enemies[i].getDirection().x).asFloat();
+					k.y = gClient.m_pakiet["enemies"][e]["dir"].get("y", m_Enemies[i].getDirection().y).asFloat();
+					kier = gClient.m_pakiet["enemies"][e].get("kierunek", m_Enemies[i].getKierunek()).asInt();
 					
 					m_Enemies[i].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
@@ -575,7 +589,7 @@ void CGame::RestartGame(bool ResetScore)
 
 	for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
 	{
-		m_OtherPlayers[i].SetStartPosition(otherPlayersStartPositions[i]);
+		m_OtherPlayers[i].SetStartPosition(otherPlayersStartPositions[0]);
 	}
 
 	m_Player->SetStartPosition(PlayerPosition);

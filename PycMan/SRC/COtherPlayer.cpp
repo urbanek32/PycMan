@@ -6,10 +6,11 @@ COtherPlayer::COtherPlayer()
 {
 }
 
-COtherPlayer::COtherPlayer(const std::string filename, sf::Vector2f StartPosition)
+COtherPlayer::COtherPlayer(const std::string filename, sf::Vector2f StartPosition, sf::Color color)
 {
 	m_Texture.loadFromImage(gResMng.Get_Image(filename));
 	m_Sprite.setTexture(m_Texture);
+	m_Sprite.setColor(color);
 	sf::IntRect rect(0, 0, 25, 25);
 	m_Sprite.setTextureRect(rect);
 	m_Sprite.setOrigin(25.f / 2.f, 25.f / 2.f);

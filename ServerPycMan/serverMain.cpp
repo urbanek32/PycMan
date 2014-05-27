@@ -42,7 +42,7 @@ public:
 	}	
 };
 
-#define BUFLEN 1500
+#define BUFLEN 10000
 
 //komendy serwera
 #define ENTERCOMMAND "IENTER"
@@ -134,7 +134,7 @@ int main()
 		//wysy³anie wiadomoœci które nie s¹ odpowiedziami na otrzymane komunikaty
 
 		//jeœli przy³¹czono 2 graczy to rozeœlij ¿e gramy
-		if (clients.size() == 2) 
+		if (clients.size() == 3) 
 		{
 			if (!_wyslanoPlay)
 			{
@@ -198,7 +198,7 @@ void receiveMessages()
 
 			case Typ::POS:
 			{
-				std::cout << "Packet with position:"<< pakiet.get("id", -1).asInt() <<"\n";
+				//std::cout << "Packet with position:"<< pakiet.get("id", -1).asInt() <<"\n";
 				//rozeœlij otrzyman¹ pozycje do reszty
 				broadcastPositionPacket(ipClient, portClient);
 				break;

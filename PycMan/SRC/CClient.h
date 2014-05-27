@@ -7,7 +7,7 @@
 #define gClient CClient::GetReference()
 #endif
 
-#define BUFLEN 1500
+#define BUFLEN 10000
 using namespace std;
 using namespace moje;
 
