@@ -28,6 +28,9 @@ private:
 	sf::Sprite m_Sprite;
 	sf::Texture m_Texture;
 
+	sf::Clock m_frameclock;
+	int m_currentframe;
+
 	sf::Vector2f m_Direction;
 
 	sf::Vector2f m_StartPosition;

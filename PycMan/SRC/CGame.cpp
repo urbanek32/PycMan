@@ -298,7 +298,7 @@ void CGame::m_Init()
 	m_TQuit.setString("Quit?\nT / N");
 
 	//tworzê nowych graczy
-	COtherPlayer *subPlayer1 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0]);
+	COtherPlayer *subPlayer1 = new COtherPlayer("DATA/pacmanALL2.bmp", otherPlayersStartPositions[0]);
 	m_OtherPlayers.push_back(*subPlayer1);
 
 	//duchy
@@ -363,15 +363,15 @@ int CGame::updateMultiplayerStuff()
 		{
 			int kier;
 			sf::Vector2f p, k;
-			p.x = gClient.m_pakiet["pos"].get("x", BlinkyPosition.x).asFloat();
-			p.y = gClient.m_pakiet["pos"].get("y", BlinkyPosition.y).asFloat();
+			p.x = gClient.m_pakiet["pos"].get("x", otherPlayersStartPositions[0].x).asFloat();
+			p.y = gClient.m_pakiet["pos"].get("y", otherPlayersStartPositions[0].y).asFloat();
 
 			kier = gClient.m_pakiet.get("kierunek", 0).asInt();
 
 			k.x = gClient.m_pakiet["direction"].get("x", 0.0f).asFloat();
 			k.y = gClient.m_pakiet["direction"].get("y", 0.0f).asFloat();
-			//std::cout << p.x << " " << p.y << "\n";
-			//m_Enemies[0].setRemotePosition(p, k, static_cast<kierunek>(kier));
+			std::cout << p.x << " " << p.y << "\n";
+			m_OtherPlayers[0].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
 
 			if (!gClient.isMasterClient())

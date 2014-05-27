@@ -23,6 +23,7 @@ void CGameManager::Run(sf::RenderWindow & App)
 void CGameManager::m_Init()
 {
 	gResMng.Load_Image("DATA/pacmanALL.bmp");
+	gResMng.Load_Image("DATA/pacmanALL2.bmp");
 
 	gResMng.Load_Image("DATA/BlinkyALL.bmp");
 	gResMng.Load_Image("DATA/ClydeALL.bmp");
