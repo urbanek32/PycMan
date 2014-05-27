@@ -150,6 +150,11 @@ int CGame::Run(sf::RenderWindow & App)
 					m_Enemies[i].SetStartPosition(enemyStartPositions[i]);
 				}
 
+				for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
+				{
+					m_OtherPlayers[i].SetStartPosition(otherPlayersStartPositions[i]);
+				}
+
 				m_Player->SetStartPosition(PlayerPosition);
 
 				m_Captured = false;
@@ -234,6 +239,9 @@ int CGame::Run(sf::RenderWindow & App)
 		// Obsluga przeciwnika
 		UpdateEnemies(App,m_ScreenCapture, m_currentTime);
 
+		//obs³uga graczy
+		UpdateOtherPlayers(App, m_ScreenCapture, m_currentTime);
+
 		// Wyœwietl iloœæ FPS
 		App.draw(m_FPS);
 
@@ -289,6 +297,11 @@ void CGame::m_Init()
 	m_TGameOver.setString("Game Over\nZakoñczyæ grê?\nT / N");
 	m_TQuit.setString("Quit?\nT / N");
 
+	//tworzê nowych graczy
+	COtherPlayer *subPlayer1 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0]);
+	m_OtherPlayers.push_back(*subPlayer1);
+
+	//duchy
 	CEnemyGhost *duch = new CEnemyGhost("DATA/BlinkyALL.bmp", enemyStartPositions[0]);
 	m_Enemies.push_back(*duch);
 	CEnemyGhost *duch2 = new CEnemyGhost("DATA/ClydeALL.bmp", enemyStartPositions[1]);
@@ -300,20 +313,18 @@ void CGame::m_Init()
 	
 	
 	//nowe
-	CEnemyGhost *duch5 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[4]);
+	CEnemyGhost *duch5 = new CEnemyGhost("DATA/BlinkyALL.bmp", enemyStartPositions[4]);
 	m_Enemies.push_back(*duch5);
-	CEnemyGhost *duch6 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[5]);
+	CEnemyGhost *duch6 = new CEnemyGhost("DATA/ClydeALL.bmp", enemyStartPositions[5]);
 	m_Enemies.push_back(*duch6);
-	CEnemyGhost *duch7 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[6]);
+	CEnemyGhost *duch7 = new CEnemyGhost("DATA/InkeyALL.bmp", enemyStartPositions[6]);
 	m_Enemies.push_back(*duch7);
 	CEnemyGhost *duch8 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[7]);
 	m_Enemies.push_back(*duch8);
-	CEnemyGhost *duch9 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[8]);
+	CEnemyGhost *duch9 = new CEnemyGhost("DATA/BlinkyALL.bmp", enemyStartPositions[8]);
 	m_Enemies.push_back(*duch9);
-	CEnemyGhost *duch10 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[9]);
+	CEnemyGhost *duch10 = new CEnemyGhost("DATA/ClydeALL.bmp", enemyStartPositions[9]);
 	m_Enemies.push_back(*duch10);
-	/*CEnemyGhost *duch11 = new CEnemyGhost("DATA/PinkyALL.bmp", enemyStartPositions[10]);
-	m_Enemies.push_back(*duch11);*/
 	
 
 	// wywali siê jak jest wiêcej wrogów ni¿ pozycji startowych
@@ -390,6 +401,14 @@ void CGame::m_CaptureScreen(sf::RenderWindow & App)
 {
 	m_ScreenCapture = App.capture();
 	m_Captured = true;
+}
+
+void CGame::UpdateOtherPlayers(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime)
+{
+	for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
+	{
+		m_OtherPlayers[i].Update(App, ScreenCapture, deltaTime);
+	}
 }
 
 void CGame::UpdateEnemies(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime)
@@ -494,6 +513,11 @@ void CGame::RestartPositions()
 	{
 		m_Enemies[i].ResetPosition();
 	}
+
+	for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
+	{
+		m_OtherPlayers[i].ResetPosition();
+	}
 	
 }
 
@@ -549,6 +573,10 @@ void CGame::RestartGame(bool ResetScore)
 		m_Enemies[i].SetStartPosition(enemyStartPositions[i]);
 	}
 
+	for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
+	{
+		m_OtherPlayers[i].SetStartPosition(otherPlayersStartPositions[i]);
+	}
 
 	m_Player->SetStartPosition(PlayerPosition);
 

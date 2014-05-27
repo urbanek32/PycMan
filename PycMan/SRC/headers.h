@@ -37,4 +37,5 @@ using namespace std;
 #include "CHighScoresMenu.h"
 #include "CLobby.h"
 #include "CClient.h"
+#include "COtherPlayer.h"
 #endif

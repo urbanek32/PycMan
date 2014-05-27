@@ -207,6 +207,9 @@ void CMapManager::LoadMap(const string filepath)
 				{
 					PlayerPosition.x = center.x;
 					PlayerPosition.y = center.y;
+
+					//ile pacmanów to tyle chyba pushów, jeszcze nie wiem
+					otherPlayersStartPositions.push_back(center);
 					break;
 				}
 				case '*':

@@ -38,6 +38,7 @@ private:
 	
 	class CPlayer *m_Player;
 
+
 	sf::Text m_FPS, m_TScore, m_TStamina, m_TAdrealina, m_TMana, m_TLives, m_TPause, m_TGameOver, m_TQuit, m_TCount;
 	sf::Font m_font;
 
@@ -52,7 +53,11 @@ private:
 	float m_lastTime, m_currentTime;
 
 	void UpdateEnemies(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime);
+
+	void UpdateOtherPlayers(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime);
+
 	vector<class CEnemyGhost> m_Enemies;
+	vector<class COtherPlayer> m_OtherPlayers;
 
 	void CheckCollision(CMapManager *maper, CPlayer *player);
 
