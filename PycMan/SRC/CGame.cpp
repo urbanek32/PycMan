@@ -397,6 +397,15 @@ int CGame::updateMultiplayerStuff()
 			rect2.top = gClient.m_pakiet["dopalacz"]["top"].asInt();
 			rect2.width = gClient.m_pakiet["dopalacz"]["width"].asInt();
 
+			bool act = gClient.m_pakiet["dopalacz"].get("activate",false).asBool();
+
+			if (act)
+			{
+				m_Player->IncStamina(50);
+				m_Player->ActiveFrenzy();
+				m_frenzyclock.restart();
+			}
+
 			for (std::deque<Food>::iterator it = m_MapMng->GetFoodShapes().begin(); it != m_MapMng->GetFoodShapes().end();)
 			{
 				if (it->shape.getGlobalBounds().intersects(rect) || it->shape.getGlobalBounds().intersects(rect2))
@@ -498,6 +507,7 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 					gClient.pakietPos["dopalacz"]["left"] = it->shape.getGlobalBounds().left;
 					gClient.pakietPos["dopalacz"]["top"] = it->shape.getGlobalBounds().top;
 					gClient.pakietPos["dopalacz"]["width"] = it->shape.getGlobalBounds().width;
+					gClient.pakietPos["dopalacz"]["activate"] = true;
 
 					m_frenzyclock.restart();
 				}				
