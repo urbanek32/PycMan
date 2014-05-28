@@ -246,13 +246,12 @@ int CGame::Run(sf::RenderWindow & App)
 		App.draw(m_FPS);
 
 		// Kolizja gracza z jedzeniem i duszkami
-		//CheckCollision(m_MapMng, m_Player);
+		CheckCollision(m_MapMng, m_Player);
 
 		OtherUpdates(App);
 
 		//wyœlij nasz pakiet na serwer
 		gClient.sendPacketPos();
-
 		// Przygotuj grê
 		if(gameState == Prepare)
 			PrepareGame(App);
@@ -277,7 +276,7 @@ int CGame::Run(sf::RenderWindow & App)
 	} // while(running)
 	return (-1);
 }
-
+int ile = 0;
 void CGame::m_Init()
 {
 	m_MapMng = new CMapManager();
@@ -384,6 +383,31 @@ int CGame::updateMultiplayerStuff()
 			std::cout << p.x << " " << p.y << "\n";
 			m_OtherPlayers[_id].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
+			//aktualizacja kropek
+			sf::FloatRect rect;
+			rect.height = gClient.m_pakiet["kropka"]["height"].asInt();
+			rect.left = gClient.m_pakiet["kropka"]["left"].asInt();
+			rect.top = gClient.m_pakiet["kropka"]["top"].asInt();
+			rect.width = gClient.m_pakiet["kropka"]["width"].asInt();
+
+			//dopalacz
+			sf::FloatRect rect2;
+			rect2.height = gClient.m_pakiet["dopalacz"]["height"].asInt();
+			rect2.left = gClient.m_pakiet["dopalacz"]["left"].asInt();
+			rect2.top = gClient.m_pakiet["dopalacz"]["top"].asInt();
+			rect2.width = gClient.m_pakiet["dopalacz"]["width"].asInt();
+
+			for (std::deque<Food>::iterator it = m_MapMng->GetFoodShapes().begin(); it != m_MapMng->GetFoodShapes().end();)
+			{
+				if (it->shape.getGlobalBounds().intersects(rect) || it->shape.getGlobalBounds().intersects(rect2))
+				{
+					it = m_MapMng->GetFoodShapes().erase(it);
+				}
+				else
+				{
+					it++;
+				}
+			}
 
 			//jako klient wyci¹gamy jeszcze pozycje duszków
 			if (!gClient.isMasterClient())
@@ -391,8 +415,6 @@ int CGame::updateMultiplayerStuff()
 				std::string e = "0";
 				for (unsigned int i = 0; i < m_Enemies.size(); i++)
 				{
-					
-
 					p.x = gClient.m_pakiet["enemies"][e]["pos"].get("x", m_Enemies[i].getPosition().x).asFloat();
 					p.y = gClient.m_pakiet["enemies"][e]["pos"].get("y", m_Enemies[i].getPosition().y).asFloat();
 					k.x = gClient.m_pakiet["enemies"][e]["dir"].get("x", m_Enemies[i].getDirection().x).asFloat();
@@ -404,7 +426,6 @@ int CGame::updateMultiplayerStuff()
 					_itoa(i, const_cast<char*>(e.c_str()), 10);
 				}
 			}
-
 		}
 	}
 	return 42;
@@ -460,14 +481,27 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 				if(it->type == 1) // Normalne jedzenie
 				{
 					m_Score+=10;
+					//wysy³am wsp do usuniêcia kropki
+					gClient.pakietPos["kropka"]["height"] = it->shape.getGlobalBounds().height;
+					gClient.pakietPos["kropka"]["left"] = it->shape.getGlobalBounds().left;
+					gClient.pakietPos["kropka"]["top"] = it->shape.getGlobalBounds().top;
+					gClient.pakietPos["kropka"]["width"] = it->shape.getGlobalBounds().width;
 				}
 				else if(it->type == 2) // Dopalacz
 				{
 					m_Score+=50;
 					player->IncStamina(50);
 					player->ActiveFrenzy();
+
+					//wysy³am wsp do usuniêcia kropki
+					gClient.pakietPos["dopalacz"]["height"] = it->shape.getGlobalBounds().height;
+					gClient.pakietPos["dopalacz"]["left"] = it->shape.getGlobalBounds().left;
+					gClient.pakietPos["dopalacz"]["top"] = it->shape.getGlobalBounds().top;
+					gClient.pakietPos["dopalacz"]["width"] = it->shape.getGlobalBounds().width;
+
 					m_frenzyclock.restart();
-				}
+				}				
+
 				it = maper->GetFoodShapes().erase(it);
 			}
 			else
@@ -493,7 +527,7 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 	m_TScore.setString(buf.str());
 
 	// Kolizja pacmana z duszkami
-	for(vector<class CEnemyGhost>::iterator it = m_Enemies.begin(); it != m_Enemies.end(); it++)
+	/*for(vector<class CEnemyGhost>::iterator it = m_Enemies.begin(); it != m_Enemies.end(); it++)
 	{
 		sf::FloatRect rect = it->GetSprite().getGlobalBounds();
 
@@ -515,7 +549,7 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 	}
 	std::ostringstream buf2;
 	buf2<<"Zycia: "<<m_Lives;
-	m_TLives.setString(buf2.str());
+	m_TLives.setString(buf2.str());*/
 }
 
 void CGame::RestartPositions()

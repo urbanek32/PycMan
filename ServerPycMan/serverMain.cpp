@@ -42,7 +42,7 @@ public:
 	}	
 };
 
-#define BUFLEN 10000
+#define BUFLEN 15000
 
 //komendy serwera
 #define ENTERCOMMAND "IENTER"
