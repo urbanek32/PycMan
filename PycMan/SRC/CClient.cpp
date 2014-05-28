@@ -16,6 +16,7 @@ void CClient::initClient(const string nick, const UInt16 serverPort, const IPAdd
 	connectedToServer = false;
 	ready = false;
 	isWaitingForPingReply = false;
+	m_master = false;
 	m_typ = Typ::UNKNOWN;
 
 	this->nickClient = nick;
@@ -87,36 +88,25 @@ bool CClient::enterToServer()
 		socket.send(odebrane.c_str(), odebrane.length(), *serverIP, serverPort);
 		connectedToServer = true;
 
-		/*SPRAWDZAM DWA RAZY BO Z JAKIEGOŒ POWODU ZA PIERWSZYM RAZEM NADAL ODBIERA PONGA OD SERWERA*/
-		std::cout << "sprawdzam wiadomosc\n";
-		if (receiveMessage(Typ::MASTER))
+		double t2 = 0, t1;
+		t1 = m_timer.getElapsedTime().asSeconds();
+		while (t2 - t1 < 5)
 		{
-			m_master = true;
-			std::cout << "Im MASTER\n";
+			receiveMessageToVariable();
+			if (typeOfReceivedMessage() == Typ::MASTER)
+			{
+				m_master = true;
+				std::cout << "Im MASTER\n";
+				break;
+			}
+			else if (typeOfReceivedMessage() == Typ::NOTMASTER)
+			{
+				m_master = false;
+				std::cout << "Master already exist\n";
+				break;
+			}
+			t2 = m_timer.getElapsedTime().asSeconds();
 		}
-		else 
-		{
-			m_master = false;
-			std::cout << "Master already exist\n";
-		}
-		std::cout << typeOfReceivedMessage() << "\n";
-		/*############################################################################################*/
-
-
-		/*SPRAWDZAM DWA RAZY BO Z JAKIEGOŒ POWODU ZA PIERWSZYM RAZEM NADAL ODBIERA PONGA OD SERWERA*/
-		std::cout << "sprawdzam wiadomosc2\n";
-		if (receiveMessage(Typ::MASTER))
-		{
-			m_master = true;
-			std::cout << "Im MASTER\n";
-		}
-		else
-		{
-			m_master = false;
-			std::cout << "Master already exist\n";
-		}
-		std::cout << typeOfReceivedMessage() << "\n";
-		/*############################################################################################*/
 
 		m_clientID = m_pakiet.get("id", -1).asInt();
 
@@ -148,8 +138,6 @@ bool CClient::receiveMessage(Typ typ)
 {
 	if (connectedToServer)
 	{
-		//if (isServerReady(1))
-		//{
 			if (socket.receive(data, BUFLEN, bytesLength, ipSender, portSender) == Socket::Done)
 			{
 				odebrane = data; //niejawne rzutowanie na stringa
@@ -168,7 +156,6 @@ bool CClient::receiveMessage(Typ typ)
 				else
 					return false;
 			}
-		//}
 	}
 	return false;
 }

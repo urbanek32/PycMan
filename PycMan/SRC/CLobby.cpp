@@ -12,7 +12,7 @@ CLobby::CLobby()
 	m_Title.setPosition(140, 70);
 	m_Title.setCharacterSize(80);
 
-	gClient.initClient("gracz1", 53000, "127.0.0.1");
+	gClient.initClient("gracz1", 53000, "192.168.2.6");
 }
 
 int CLobby::Run(sf::RenderWindow & App)

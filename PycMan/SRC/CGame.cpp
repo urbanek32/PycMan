@@ -362,7 +362,6 @@ int CGame::updateMultiplayerStuff()
 	//gdy otrzymano pakiet z pozycj¹
 	if (gClient.typeOfReceivedMessage() == Typ::POS)
 	{
-		
 		int _id = gClient.m_pakiet.get("id", -1).asInt();
 
 		//syfny pakiet
