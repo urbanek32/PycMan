@@ -12,8 +12,15 @@ CLobby::CLobby()
 	m_Title.setPosition(140, 70);
 	m_Title.setCharacterSize(80);
 
-	gClient.initClient("gracz1", 53000, "62.61.60.7");
-	//gClient.initClient("gracz1", 53000, "127.0.0.1");
+
+	ifstream plik("DATA/server_ip.txt");
+	std::string ip = "127.0.0.1";
+	if (plik.is_open())
+	{
+		plik >> ip;
+		plik.close();
+	}
+	gClient.initClient("gracz1", 53000, ip);
 }
 
 int CLobby::Run(sf::RenderWindow & App)
