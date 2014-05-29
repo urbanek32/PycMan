@@ -225,6 +225,12 @@ int CGame::Run(sf::RenderWindow & App)
 			EndScore = m_Score;
 			gameState = GameOver;
 		}
+		else
+		{ //wyœwietlaj ¿ycia dopóki masz
+			std::ostringstream buf;
+			buf << "Lives: " << m_Lives;
+			m_TLives.setString(buf.str());
+		}
 
 		// Rysowanie mapy
 		m_MapMng->DrawMap(App);
@@ -246,12 +252,13 @@ int CGame::Run(sf::RenderWindow & App)
 		App.draw(m_FPS);
 
 		// Kolizja gracza z jedzeniem i duszkami
-		CheckCollision(m_MapMng, m_Player);
+		OtherUpdates(App);		
 
-		OtherUpdates(App);
+		CheckCollision(m_MapMng, m_Player);
 
 		//wyœlij nasz pakiet na serwer
 		gClient.sendPacketPos();
+
 		// Przygotuj grê
 		if(gameState == Prepare)
 			PrepareGame(App);
@@ -383,6 +390,7 @@ int CGame::updateMultiplayerStuff()
 			std::cout << p.x << " " << p.y << "\n";
 			m_OtherPlayers[_id].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
+			
 			//aktualizacja kropek
 			sf::FloatRect rect;
 			rect.height = gClient.m_pakiet["kropka"]["height"].asInt();
@@ -397,20 +405,25 @@ int CGame::updateMultiplayerStuff()
 			rect2.top = gClient.m_pakiet["dopalacz"]["top"].asInt();
 			rect2.width = gClient.m_pakiet["dopalacz"]["width"].asInt();
 
-			bool act = gClient.m_pakiet["dopalacz"].get("activate",false).asBool();
+			bool act = gClient.m_pakiet["dopalacz"]["activate"].asBool();
 
 			if (act)
 			{
-				m_Player->IncStamina(50);
 				m_Player->ActiveFrenzy();
 				m_frenzyclock.restart();
 			}
 
 			for (std::deque<Food>::iterator it = m_MapMng->GetFoodShapes().begin(); it != m_MapMng->GetFoodShapes().end();)
 			{
-				if (it->shape.getGlobalBounds().intersects(rect) || it->shape.getGlobalBounds().intersects(rect2))
+				if (it->shape.getGlobalBounds().intersects(rect))
 				{
 					it = m_MapMng->GetFoodShapes().erase(it);
+					m_Score += 10; //aktualizacja wyniku od przychodz¹cego po³¹czenia
+				}
+				else if (it->shape.getGlobalBounds().intersects(rect2))
+				{
+					it = m_MapMng->GetFoodShapes().erase(it);
+					m_Score += 50; //aktualizacja wyniku od przychodz¹cego po³¹czenia
 				}
 				else
 				{
@@ -434,6 +447,9 @@ int CGame::updateMultiplayerStuff()
 
 					_itoa(i, const_cast<char*>(e.c_str()), 10);
 				}
+
+				//aktualizacja wyniku
+				m_Score = gClient.m_pakiet["wynik"].asFloat();
 			}
 		}
 	}
@@ -489,7 +505,10 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 			{
 				if(it->type == 1) // Normalne jedzenie
 				{
-					m_Score+=10;
+					if (gClient.isMasterClient())
+					{
+						m_Score += 10;
+					}
 					//wysy³am wsp do usuniêcia kropki
 					gClient.pakietPos["kropka"]["height"] = it->shape.getGlobalBounds().height;
 					gClient.pakietPos["kropka"]["left"] = it->shape.getGlobalBounds().left;
@@ -498,7 +517,11 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 				}
 				else if(it->type == 2) // Dopalacz
 				{
-					m_Score+=50;
+					if (gClient.isMasterClient())
+					{
+						m_Score += 50;
+					}
+
 					player->IncStamina(50);
 					player->ActiveFrenzy();
 
@@ -518,7 +541,11 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 			{
 				it++;
 			}
+
 		}
+
+		//wysy³am pakiet wyniku do innych graczy
+		if (gClient.isMasterClient()) gClient.pakietPos["wynik"] = m_Score;
 	}
 	else // Je¿eli zjdeliœmy wszystko za³aduj now¹ mape
 	{
