@@ -387,48 +387,60 @@ int CGame::updateMultiplayerStuff()
 
 			k.x = gClient.m_pakiet["direction"].get("x", m_OtherPlayers[_id].getDirection().x).asFloat();
 			k.y = gClient.m_pakiet["direction"].get("y", m_OtherPlayers[_id].getDirection().y).asFloat();
-			std::cout << p.x << " " << p.y << "\n";
+			//std::cout << p.x << " " << p.y << "\n";
 			m_OtherPlayers[_id].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
 			
+			std::string kropencja = "0";
+			bool dopalony = false; // ¿eby ci¹gle nie dodawa³ dopalacza
+			int iloscKropek = gClient.m_pakiet["kropka"].get("ilosc", 0).asInt();
+
 			//aktualizacja kropek
-			sf::FloatRect rect;
-			rect.height = gClient.m_pakiet["kropka"]["height"].asInt();
-			rect.left = gClient.m_pakiet["kropka"]["left"].asInt();
-			rect.top = gClient.m_pakiet["kropka"]["top"].asInt();
-			rect.width = gClient.m_pakiet["kropka"]["width"].asInt();
-
-			//dopalacz
-			sf::FloatRect rect2;
-			rect2.height = gClient.m_pakiet["dopalacz"]["height"].asInt();
-			rect2.left = gClient.m_pakiet["dopalacz"]["left"].asInt();
-			rect2.top = gClient.m_pakiet["dopalacz"]["top"].asInt();
-			rect2.width = gClient.m_pakiet["dopalacz"]["width"].asInt();
-
-			bool act = gClient.m_pakiet["dopalacz"]["activate"].asBool();
-
-			if (act)
+			for (int i = 0; i < iloscKropek; i++)
 			{
-				m_Player->ActiveFrenzy();
-				m_frenzyclock.restart();
-			}
+				_itoa(i, const_cast<char*>(kropencja.c_str()), 10);
 
-			for (std::deque<Food>::iterator it = m_MapMng->GetFoodShapes().begin(); it != m_MapMng->GetFoodShapes().end();)
-			{
-				if (it->shape.getGlobalBounds().intersects(rect))
+				sf::FloatRect rect;
+				rect.height = gClient.m_pakiet["kropka"][kropencja]["height"].asInt();
+				rect.left = gClient.m_pakiet["kropka"][kropencja]["left"].asInt();
+				rect.top = gClient.m_pakiet["kropka"][kropencja]["top"].asInt();
+				rect.width = gClient.m_pakiet["kropka"][kropencja]["width"].asInt();
+
+				//dopalacz
+				sf::FloatRect rect2;
+				rect2.height = gClient.m_pakiet["dopalacz"]["height"].asInt();
+				rect2.left = gClient.m_pakiet["dopalacz"]["left"].asInt();
+				rect2.top = gClient.m_pakiet["dopalacz"]["top"].asInt();
+				rect2.width = gClient.m_pakiet["dopalacz"]["width"].asInt();
+
+				bool act = gClient.m_pakiet["dopalacz"].get("activate", false).asBool();
+
+				if (act)
 				{
-					it = m_MapMng->GetFoodShapes().erase(it);
-					m_Score += 10; //aktualizacja wyniku od przychodz¹cego po³¹czenia
+					m_Player->ActiveFrenzy();
+					m_frenzyclock.restart();
 				}
-				else if (it->shape.getGlobalBounds().intersects(rect2))
+
+				for (std::deque<Food>::iterator it = m_MapMng->GetFoodShapes().begin(); it != m_MapMng->GetFoodShapes().end();)
 				{
-					it = m_MapMng->GetFoodShapes().erase(it);
-					m_Score += 50; //aktualizacja wyniku od przychodz¹cego po³¹czenia
+					if (it->shape.getGlobalBounds().intersects(rect))
+					{
+						it = m_MapMng->GetFoodShapes().erase(it);
+						m_Score += 10; //aktualizacja wyniku od przychodz¹cego po³¹czenia
+					}
+					else if (it->shape.getGlobalBounds().intersects(rect2) && !dopalony)
+					{
+						it = m_MapMng->GetFoodShapes().erase(it);
+						m_Score += 50; //aktualizacja wyniku od przychodz¹cego po³¹czenia
+						dopalony = true;
+					}
+					else
+					{
+						it++;
+					}
 				}
-				else
-				{
-					it++;
-				}
+
+				
 			}
 
 			//jako klient wyci¹gamy jeszcze pozycje duszków
@@ -493,7 +505,8 @@ void CGame::UpdateEnemies(sf::RenderWindow & App, sf::Image& ScreenCapture, floa
 
 void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 {
-	
+	int iloscKolizji = 0;
+	std::string _e = "0";
 	if(maper->GetFoodShapes().size() > 0)
 	{
 		// Kolizja pacmana z jedzeniem
@@ -503,17 +516,23 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 
 			if(player->GetSprite().getGlobalBounds().intersects(rect))
 			{
+
 				if(it->type == 1) // Normalne jedzenie
 				{
 					if (gClient.isMasterClient())
 					{
 						m_Score += 10;
 					}
+
 					//wysy³am wsp do usuniêcia kropki
-					gClient.pakietPos["kropka"]["height"] = it->shape.getGlobalBounds().height;
-					gClient.pakietPos["kropka"]["left"] = it->shape.getGlobalBounds().left;
-					gClient.pakietPos["kropka"]["top"] = it->shape.getGlobalBounds().top;
-					gClient.pakietPos["kropka"]["width"] = it->shape.getGlobalBounds().width;
+					gClient.pakietPos["kropka"]["ilosc"] = ++iloscKolizji;
+					_itoa(iloscKolizji - 1, const_cast<char*>(_e.c_str()), 10);
+					gClient.pakietPos["kropka"][_e]["height"] = it->shape.getGlobalBounds().height;
+					gClient.pakietPos["kropka"][_e]["left"] = it->shape.getGlobalBounds().left;
+					gClient.pakietPos["kropka"][_e]["top"] = it->shape.getGlobalBounds().top;
+					gClient.pakietPos["kropka"][_e]["width"] = it->shape.getGlobalBounds().width;	
+					//std::cout << iloscKolizji << "\t" << _e << "\n";
+
 				}
 				else if(it->type == 2) // Dopalacz
 				{
@@ -531,9 +550,11 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 					gClient.pakietPos["dopalacz"]["top"] = it->shape.getGlobalBounds().top;
 					gClient.pakietPos["dopalacz"]["width"] = it->shape.getGlobalBounds().width;
 					gClient.pakietPos["dopalacz"]["activate"] = true;
+					gClient.pakietPos["kropka"]["ilosc"] = ++iloscKolizji;
 
 					m_frenzyclock.restart();
-				}				
+				}
+
 
 				it = maper->GetFoodShapes().erase(it);
 			}
@@ -542,6 +563,7 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 				it++;
 			}
 
+			
 		}
 
 		//wysy³am pakiet wyniku do innych graczy
