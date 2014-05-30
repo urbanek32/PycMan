@@ -6,7 +6,7 @@ COtherPlayer::COtherPlayer()
 {
 }
 
-COtherPlayer::COtherPlayer(const std::string filename, sf::Vector2f StartPosition, sf::Color color)
+COtherPlayer::COtherPlayer(const std::string filename, sf::Vector2f StartPosition, sf::Color color, bool _placeholder)
 {
 	m_Texture.loadFromImage(gResMng.Get_Image(filename));
 	m_Sprite.setTexture(m_Texture);
@@ -23,6 +23,7 @@ COtherPlayer::COtherPlayer(const std::string filename, sf::Vector2f StartPositio
 
 	m_StartPosition = sf::Vector2f(StartPosition.x + 1, StartPosition.y + 1);
 
+	m_placeHolder = _placeholder;
 }
 
 void COtherPlayer::Update(sf::RenderWindow & App, sf::Image& ScreenCapture, float & deltaTime)
@@ -134,3 +135,7 @@ void COtherPlayer::SetStartPosition(sf::Vector2f & Position)
 	m_StartPosition = sf::Vector2f(Position.x + 1, Position.y + 1);
 }
 
+bool COtherPlayer::isPlaceHolder() const
+{
+	return m_placeHolder;
+}

@@ -82,6 +82,8 @@ private:
 
 	int updateMultiplayerStuff();
 
+	int calculateID(int ID);
+
 	// czy okno z gra jest aktywne
 	bool m_isActive;
 };

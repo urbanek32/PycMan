@@ -8,7 +8,7 @@ class COtherPlayer
 public:
 	COtherPlayer();
 
-	COtherPlayer(const std::string filename, sf::Vector2f StartPosition, sf::Color color);
+	COtherPlayer(const std::string filename, sf::Vector2f StartPosition, sf::Color color, bool placeHolder = false);
 
 	sf::Sprite & GetSprite();
 
@@ -24,6 +24,8 @@ public:
 	sf::Vector2f getDirection() const;
 	int getKierunek() const;
 
+	bool isPlaceHolder() const;
+
 private:
 	sf::Sprite m_Sprite;
 	sf::Texture m_Texture;
@@ -36,6 +38,8 @@ private:
 	sf::Vector2f m_StartPosition;
 
 	kierunek m_kierunek, m_NowyKierunek;
+
+	bool m_placeHolder;
 	
 };
 extern std::vector<sf::Vector2f>otherPlayersStartPositions;

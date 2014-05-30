@@ -308,7 +308,7 @@ void CGame::m_Init()
 	m_OtherPlayers.push_back(*subPlayer1);
 	COtherPlayer *subPlayer2 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color::Green);
 	m_OtherPlayers.push_back(*subPlayer2);
-	COtherPlayer *subPlayer3 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color(255,150,0));
+	COtherPlayer *subPlayer3 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color(255,150,0), true);
 	m_OtherPlayers.push_back(*subPlayer3);
 
 	//duchy
@@ -374,10 +374,13 @@ int CGame::updateMultiplayerStuff()
 		if (_id == -1)
 			return 42;
 
+		
+
 		//na wypadek gdybyœmy odebrali swój w³asny pakiet
 		if (_id != gClient.getClientID())
 		{
-			_id--;
+			_id = calculateID(_id);
+
 			int kier;
 			sf::Vector2f p, k;
 			p.x = gClient.m_pakiet["pos"].get("x", m_OtherPlayers[_id].getPosition().x).asFloat();
@@ -478,7 +481,10 @@ void CGame::UpdateOtherPlayers(sf::RenderWindow & App, sf::Image& ScreenCapture,
 {
 	for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
 	{
-		m_OtherPlayers[i].Update(App, ScreenCapture, deltaTime);
+		if (!m_OtherPlayers[i].isPlaceHolder())
+		{
+			m_OtherPlayers[i].Update(App, ScreenCapture, deltaTime);
+		}
 	}
 }
 
@@ -802,4 +808,57 @@ void CGame::PrepareGame(sf::RenderWindow & App)
 		App.draw(m_overShape);
 		App.draw(m_TCount);
 	}
+}
+
+int CGame::calculateID(int _ID)
+{
+	int newID = -1;
+	switch (gClient.getClientID())
+	{
+		case 1:
+		{
+			if (_ID == 2)
+				newID = 0;
+			else if (_ID == 3)
+				newID = 1;
+			else if (_ID == 4)
+				newID = 2;
+			break;
+		}
+
+		case 2:
+		{
+			if (_ID == 1)
+				newID = 0;
+			else if (_ID == 3)
+				newID = 1;
+			else if (_ID == 4)
+				newID = 2;
+			break;		  
+		}
+
+		case 3:
+		{
+			if (_ID == 1)
+				newID = 0;
+			else if (_ID == 2)
+				newID = 1;
+			else if (_ID == 4)
+				newID = 2;
+			break;
+		}
+
+		case 4:
+		{
+			if (_ID == 1)
+				newID = 0;
+			else if (_ID == 2)
+				newID = 1;
+			else if (_ID == 3)
+				newID = 2;
+			break;
+		}
+	}
+
+	return newID;
 }
