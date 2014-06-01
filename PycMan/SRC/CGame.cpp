@@ -14,6 +14,7 @@ CGame::CGame()
 	m_lastTime = 0;
 	m_currentTime = 0;
 	m_count = 5;
+	restarted = true;
 
 	gameState = Prepare;
 
@@ -104,6 +105,15 @@ int CGame::Run(sf::RenderWindow & App)
 		
 		if( !m_Inited )
 			m_Init();
+
+
+		//m_mutex.lock();
+		/*if (restarted)
+		{
+			receiverThread->launch();
+			restarted = false;
+		}*/
+		//m_mutex.lock();
 
 		//ile pakietów na klatkê
 		for (int i = 0; i < 3; i++)
@@ -237,6 +247,7 @@ int CGame::Run(sf::RenderWindow & App)
 					//receiverThread->terminate();
 					gClient.leaveServer();					
 					RestartGame(true);
+					//m_Inited = false;
 					return (0);
 
 				}
@@ -315,7 +326,7 @@ int CGame::Run(sf::RenderWindow & App)
 	} // while(running)
 	return (-1);
 }
-int ile = 0;
+
 void CGame::m_Init()
 {
 	m_MapMng = new CMapManager();
@@ -392,13 +403,12 @@ void CGame::m_Init()
 
 void CGame::receivePackageInNewThread()
 {
-	sf::Mutex mutex;
 	gClient.socket.setBlocking(true);
 	bool warunek;
 
-	mutex.lock();
+	m_mutex.lock();
 	warunek = restarted;
-	mutex.unlock();
+	m_mutex.unlock();
 
 	while (!warunek)
 	{
@@ -407,9 +417,9 @@ void CGame::receivePackageInNewThread()
 		{
 			packageQueue.push(gClient.m_pakiet);
 		}
-		mutex.lock();
+		m_mutex.lock();
 		warunek = restarted;
-		mutex.unlock();
+		m_mutex.unlock();
 	}
 	gClient.socket.setBlocking(false);
 }
