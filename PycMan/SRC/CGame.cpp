@@ -207,16 +207,20 @@ int CGame::Run(sf::RenderWindow & App)
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
 				{
 					// zakoñcz grê
+					m_mutex.lock();
 					restarted = true;
-					receiverThread->terminate();
+					m_mutex.unlock();
+					//receiverThread->terminate();
 					return (-1);
 				}
 
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::N)
 				{
 					// rozpocznij od nowa
+					m_mutex.lock();
 					restarted = true;
-					receiverThread->terminate();
+					m_mutex.unlock();
+					//receiverThread->terminate();
 					packageQueue.clearQueue();
 					RestartGame(true);
 				}
@@ -227,8 +231,10 @@ int CGame::Run(sf::RenderWindow & App)
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
 				{
 					// wróæ do menu
+					m_mutex.lock();
 					restarted = true;
-					receiverThread->terminate();
+					m_mutex.unlock();
+					//receiverThread->terminate();
 					gClient.leaveServer();					
 					RestartGame(true);
 					return (0);
@@ -386,14 +392,24 @@ void CGame::m_Init()
 
 void CGame::receivePackageInNewThread()
 {
+	sf::Mutex mutex;
 	gClient.socket.setBlocking(true);
-	while (!restarted)
+	bool warunek;
+
+	mutex.lock();
+	warunek = restarted;
+	mutex.unlock();
+
+	while (!warunek)
 	{
 		gClient.receiveMessageToVariable();
 		if (gClient.typeOfReceivedMessage() == Typ::POS)
 		{
 			packageQueue.push(gClient.m_pakiet);
 		}
+		mutex.lock();
+		warunek = restarted;
+		mutex.unlock();
 	}
 	gClient.socket.setBlocking(false);
 }
@@ -403,8 +419,10 @@ int CGame::updateMultiplayerStuff()
 {	
 	if (gClient.typeOfReceivedMessage() == Typ::STOP)
 	{
+		m_mutex.lock();
 		restarted = true;
-		receiverThread->terminate();
+		m_mutex.unlock();
+		//receiverThread->terminate();
 		gClient.leaveServer();
 		RestartGame(true);
 		return 0;

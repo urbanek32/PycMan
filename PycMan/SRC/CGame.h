@@ -30,6 +30,7 @@ private:
 	bool restarted;
 	void receivePackageInNewThread();
 	sf::Thread *receiverThread;
+	sf::Mutex m_mutex;
 
 	//uaktualnia pozycje wzglêdem otrzymanego pakietu
 	void changePositions();
