@@ -105,40 +105,24 @@ int CGame::Run(sf::RenderWindow & App)
 		if( !m_Inited )
 			m_Init();
 
-		
-		switch ( updateMultiplayerStuff() )
+		//ile pakietów na klatkê
+		for (int i = 0; i < 3; i++)
 		{
-		case 42:
-			//nic sie nie stalo
-			break;
+			switch (updateMultiplayerStuff())
+			{
+				case 42:
+					//nic sie nie stalo
+					break;
 
-		case 3:
-			return 3;
-			break;
-		}
+				case 3:
+					return 3;
+					break;
 
-		switch (updateMultiplayerStuff())
-		{
-		case 42:
-			//nic sie nie stalo
-			break;
-
-		case 3:
-			return 3;
-			break;
-		}
-
-		switch (updateMultiplayerStuff())
-		{
-		case 42:
-			//nic sie nie stalo
-			break;
-
-		case 3:
-			return 3;
-			break;
-		}
-		// to tutaj przyjdzie wiadomoœæ i trzeba np wróciæ do menu, nowy w¹tek??? nie ogarniam jak go zrobiæ		
+				case 0:
+					return 0;
+					break;
+			}
+		}			
 		
 		while(App.pollEvent(m_Event))
 		{
@@ -161,7 +145,7 @@ int CGame::Run(sf::RenderWindow & App)
 				return (-1);
 			}
 
-			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F12)
+			/*if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F12 && gClient.isMasterClient())
 			{
 				m_LevelNumer++;
 
@@ -174,14 +158,16 @@ int CGame::Run(sf::RenderWindow & App)
 
 				for (unsigned int i = 0; i < m_Enemies.size(); i++)
 				{
+					cout << i << " ";
 					m_Enemies[i].SetStartPosition(enemyStartPositions[i]);
 				}
-
-				for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
+				cout << m_OtherPlayers.size()<<"=="<<otherPlayersStartPositions.size() << endl;
+				for (unsigned int i = 0; i < m_OtherPlayers.size()-1; i++)
 				{
+					cout << i << " ";
 					m_OtherPlayers[i].SetStartPosition(otherPlayersStartPositions[i]);
 				}
-
+				
 				m_Player->SetStartPosition(PlayerPosition);
 
 				m_Captured = false;
@@ -193,12 +179,12 @@ int CGame::Run(sf::RenderWindow & App)
 				gameState = Prepare;
 			}
 
-			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F11)
+			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F11 && gClient.isMasterClient())
 			{
 				restarted = true;
 				packageQueue.clearQueue();
 				RestartPositions();
-			}
+			}*/
 
 			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::Escape)
 			{
@@ -208,13 +194,13 @@ int CGame::Run(sf::RenderWindow & App)
 					gameState = Play;
 			}
 
-			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::P)
+			/*if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::P)
 			{
 				if (gameState == Play)
 					gameState = Pauza;
 				else if (gameState == Pauza)
 					gameState = Play;
-			}
+			}*/
 
 			if (gameState == GameOver)
 			{
@@ -222,6 +208,7 @@ int CGame::Run(sf::RenderWindow & App)
 				{
 					// zakoñcz grê
 					restarted = true;
+					receiverThread->terminate();
 					return (-1);
 				}
 
@@ -229,6 +216,7 @@ int CGame::Run(sf::RenderWindow & App)
 				{
 					// rozpocznij od nowa
 					restarted = true;
+					receiverThread->terminate();
 					packageQueue.clearQueue();
 					RestartGame(true);
 				}
@@ -239,7 +227,9 @@ int CGame::Run(sf::RenderWindow & App)
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
 				{
 					// wróæ do menu
-					gClient.leaveServer();
+					restarted = true;
+					receiverThread->terminate();
+					gClient.leaveServer();					
 					RestartGame(true);
 					return (0);
 
@@ -410,18 +400,16 @@ void CGame::receivePackageInNewThread()
 
 // domyœlnie zwracamy 42, czyli nic siê nie dzieje
 int CGame::updateMultiplayerStuff()
-{
-	//jeœli server straci klienta i bêdzie mniej ni¿ n graczy
-	//gClient.receiveMessageToVariable();
-	
+{	
 	if (gClient.typeOfReceivedMessage() == Typ::STOP)
 	{
+		restarted = true;
+		receiverThread->terminate();
+		gClient.leaveServer();
 		RestartGame(true);
-		return 3;
+		return 0;
 	}
 
-	//gdy otrzymano pakiet z pozycj¹
-	//if (gClient.typeOfReceivedMessage() == Typ::POS)
 	if (!packageQueue.isEmpty())
 	{
 		Json::Value pakiecik = packageQueue.pop();
@@ -430,9 +418,7 @@ int CGame::updateMultiplayerStuff()
 
 		//syfny pakiet
 		if (_id == -1)
-			return 42;
-
-		
+			return 42;		
 
 		//na wypadek gdybyœmy odebrali swój w³asny pakiet
 		if (_id != gClient.getClientID())
@@ -522,7 +508,7 @@ int CGame::updateMultiplayerStuff()
 				}
 
 				//aktualizacja wyniku
-				m_Score = pakiecik["wynik"].asFloat();
+				m_Score = pakiecik.get("wynik", m_Score).asFloat();
 			}
 		}
 	}
@@ -749,6 +735,8 @@ void CGame::RestartGame(bool ResetScore)
 	}
 
 	m_Player->SetStartPosition(PlayerPosition);
+
+	packageQueue.clearQueue();
 
 	gameState = Prepare;
 }
