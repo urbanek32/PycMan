@@ -27,7 +27,9 @@ private:
 	bool m_Captured;
 	void m_CaptureScreen(sf::RenderWindow & App);
 	
-	
+	bool restarted;
+	void receivePackageInNewThread();
+	sf::Thread *receiverThread;
 
 	//uaktualnia pozycje wzglêdem otrzymanego pakietu
 	void changePositions();

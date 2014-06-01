@@ -91,6 +91,9 @@
   <ItemGroup>
     <ClCompile Include="serverMain.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConcurrentQueue.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

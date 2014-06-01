@@ -20,12 +20,8 @@
 
 #include <json/json.h>
 
-#include "ConcurrentQueue.hpp"
-#include <thread> 
-
 using namespace moje;
 using namespace std;
-
 
 class ServerClient
 {
@@ -80,8 +76,6 @@ void receiveMessages();
 
 void broadcastPositionPacket(IPAddress adres, UInt16 port);
 
-void broadcastPositionPacket2();
-
 //wektor trzymaj¹cy pod³¹czonych klientów
 vector<ServerClient> clients;
 
@@ -115,17 +109,11 @@ size_t bytesLength, phrasesPosition;
 
 bool _wyslanoPlay = false;
 
-ConcurrentQueue<string> kolejkaPos; //kolejka zawierajaca odczytane pozycje
-
 int main()
 {
 	//blokowanie socketa...???
 	//znaczy tyle ¿e funkcja receive nie czeka na pakiety tylko zwraca b³¹d gdy nie ma pakietów do odebrania
 	socket.setBlocking(true);
-
-	//w¹tek rozsy³aj¹cy punkty
-	//std::thread first(broadcastPositionPacket2); //tworzê i uruchamiam w¹tek rozsy³ajacy
-	
 
 	//bindowanie servera z portem
 	if (socket.bind(serverPort) != moje::Socket::Done)
@@ -146,7 +134,7 @@ int main()
 		//wysy³anie wiadomoœci które nie s¹ odpowiedziami na otrzymane komunikaty
 
 		//jeœli przy³¹czono 2 graczy to rozeœlij ¿e gramy
-		if (clients.size() == 4) 
+		if (clients.size() == 3) 
 		{
 			if (!_wyslanoPlay)
 			{
@@ -212,7 +200,6 @@ void receiveMessages()
 			{
 				//std::cout << "Packet with position:"<< pakiet.get("id", -1).asInt() <<"\n";
 				//rozeœlij otrzyman¹ pozycje do reszty
-				//kolejkaPos.push(odebrane);				
 				broadcastPositionPacket(ipClient, portClient);
 				break;
 			}
@@ -261,27 +248,6 @@ void broadcastPositionPacket(IPAddress adres, UInt16 port)
 				}
 			}
 		}
-	}
-}
-
-void broadcastPositionPacket2()
-{
-	string pakiecik;
-	while (true)
-	{		
-		if (clients.size() > 0)
-		{
-			pakiecik = kolejkaPos.pop();
-			for (vector<ServerClient>::iterator it = clients.begin(); it != clients.end(); it++)
-			{
-				std::cout << it->address.toString() << ":" << it->port << "\n";
-				if (socket.send(pakiecik.c_str(), pakiecik.length(), it->address, it->port) != Socket::Done)
-				{
-					cout << "Cannot send position packet to " << it->address.toString() << ":" << it->port << "\n";
-				}
-			}
-		}
-		
 	}
 }
 

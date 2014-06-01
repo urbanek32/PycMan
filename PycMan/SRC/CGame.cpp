@@ -2,6 +2,9 @@
 
 GameState gameState;
 
+ConcurrentQueue<Json::Value> packageQueue;
+
+
 CGame::CGame()
 {
 	m_Running = true;
@@ -72,6 +75,8 @@ CGame::CGame()
 	m_TCount.setColor(sf::Color(255,140,0,255));
 	m_TCount.setPosition(190, 230);
 	m_TCount.setCharacterSize(100);
+
+
 }
 
 int CGame::Run(sf::RenderWindow & App)
@@ -111,7 +116,29 @@ int CGame::Run(sf::RenderWindow & App)
 			return 3;
 			break;
 		}
-		// to tutaj przyjdzie wiadomoœæ i trzeba np wróciæ do menu, nowy w¹tek??? nie ogarniam jak go zrobiæ
+
+		switch (updateMultiplayerStuff())
+		{
+		case 42:
+			//nic sie nie stalo
+			break;
+
+		case 3:
+			return 3;
+			break;
+		}
+
+		switch (updateMultiplayerStuff())
+		{
+		case 42:
+			//nic sie nie stalo
+			break;
+
+		case 3:
+			return 3;
+			break;
+		}
+		// to tutaj przyjdzie wiadomoœæ i trzeba np wróciæ do menu, nowy w¹tek??? nie ogarniam jak go zrobiæ		
 		
 		while(App.pollEvent(m_Event))
 		{
@@ -158,12 +185,18 @@ int CGame::Run(sf::RenderWindow & App)
 				m_Player->SetStartPosition(PlayerPosition);
 
 				m_Captured = false;
+
+				restarted = true;
+				packageQueue.clearQueue();
+
 				RestartPositions();
 				gameState = Prepare;
 			}
 
 			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::F11)
 			{
+				restarted = true;
+				packageQueue.clearQueue();
 				RestartPositions();
 			}
 
@@ -188,12 +221,15 @@ int CGame::Run(sf::RenderWindow & App)
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
 				{
 					// zakoñcz grê
+					restarted = true;
 					return (-1);
 				}
 
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::N)
 				{
 					// rozpocznij od nowa
+					restarted = true;
+					packageQueue.clearQueue();
 					RestartGame(true);
 				}
 			}
@@ -294,6 +330,8 @@ void CGame::m_Init()
 	m_Inited = true;
 	m_Captured = false;
 
+	restarted = false;
+
 	m_TScore.setString("0");
 	m_TStamina.setString("0");
 	m_TAdrealina.setString("0");
@@ -308,7 +346,7 @@ void CGame::m_Init()
 	m_OtherPlayers.push_back(*subPlayer1);
 	COtherPlayer *subPlayer2 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color::Green);
 	m_OtherPlayers.push_back(*subPlayer2);
-	COtherPlayer *subPlayer3 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color(255,150,0), true);
+	COtherPlayer *subPlayer3 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color(255,150,0), false);
 	m_OtherPlayers.push_back(*subPlayer3);
 
 	//duchy
@@ -350,14 +388,31 @@ void CGame::m_Init()
 	m_overtp.setPosition(410,200);
 	m_overtp.setFillColor(sf::Color(0,0,0,255));
 
+	receiverThread = new sf::Thread(&CGame::receivePackageInNewThread, this);
+	receiverThread->launch();
+
 	m_startclock.restart();
+}
+
+void CGame::receivePackageInNewThread()
+{
+	gClient.socket.setBlocking(true);
+	while (!restarted)
+	{
+		gClient.receiveMessageToVariable();
+		if (gClient.typeOfReceivedMessage() == Typ::POS)
+		{
+			packageQueue.push(gClient.m_pakiet);
+		}
+	}
+	gClient.socket.setBlocking(false);
 }
 
 // domyœlnie zwracamy 42, czyli nic siê nie dzieje
 int CGame::updateMultiplayerStuff()
 {
 	//jeœli server straci klienta i bêdzie mniej ni¿ n graczy
-	gClient.receiveMessageToVariable();
+	//gClient.receiveMessageToVariable();
 	
 	if (gClient.typeOfReceivedMessage() == Typ::STOP)
 	{
@@ -366,9 +421,12 @@ int CGame::updateMultiplayerStuff()
 	}
 
 	//gdy otrzymano pakiet z pozycj¹
-	if (gClient.typeOfReceivedMessage() == Typ::POS)
+	//if (gClient.typeOfReceivedMessage() == Typ::POS)
+	if (!packageQueue.isEmpty())
 	{
-		int _id = gClient.m_pakiet.get("id", -1).asInt();
+		Json::Value pakiecik = packageQueue.pop();
+
+		int _id = pakiecik.get("id", -1).asInt();
 
 		//syfny pakiet
 		if (_id == -1)
@@ -383,20 +441,20 @@ int CGame::updateMultiplayerStuff()
 
 			int kier;
 			sf::Vector2f p, k;
-			p.x = gClient.m_pakiet["pos"].get("x", m_OtherPlayers[_id].getPosition().x).asFloat();
-			p.y = gClient.m_pakiet["pos"].get("y", m_OtherPlayers[_id].getPosition().y).asFloat();
+			p.x = pakiecik["pos"].get("x", m_OtherPlayers[_id].getPosition().x).asFloat();
+			p.y = pakiecik["pos"].get("y", m_OtherPlayers[_id].getPosition().y).asFloat();
 
-			kier = gClient.m_pakiet.get("kierunek", m_OtherPlayers[_id].getKierunek()).asInt();
+			kier = pakiecik.get("kierunek", m_OtherPlayers[_id].getKierunek()).asInt();
 
-			k.x = gClient.m_pakiet["direction"].get("x", m_OtherPlayers[_id].getDirection().x).asFloat();
-			k.y = gClient.m_pakiet["direction"].get("y", m_OtherPlayers[_id].getDirection().y).asFloat();
+			k.x = pakiecik["direction"].get("x", m_OtherPlayers[_id].getDirection().x).asFloat();
+			k.y = pakiecik["direction"].get("y", m_OtherPlayers[_id].getDirection().y).asFloat();
 			//std::cout << p.x << " " << p.y << "\n";
 			m_OtherPlayers[_id].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
 			
 			std::string kropencja = "0";
 			bool dopalony = false; // ¿eby ci¹gle nie dodawa³ dopalacza
-			int iloscKropek = gClient.m_pakiet["kropka"].get("ilosc", 0).asInt();
+			int iloscKropek = pakiecik["kropka"].get("ilosc", 0).asInt();
 
 			//aktualizacja kropek
 			for (int i = 0; i < iloscKropek; i++)
@@ -404,19 +462,19 @@ int CGame::updateMultiplayerStuff()
 				_itoa(i, const_cast<char*>(kropencja.c_str()), 10);
 
 				sf::FloatRect rect;
-				rect.height = gClient.m_pakiet["kropka"][kropencja]["height"].asInt();
-				rect.left = gClient.m_pakiet["kropka"][kropencja]["left"].asInt();
-				rect.top = gClient.m_pakiet["kropka"][kropencja]["top"].asInt();
-				rect.width = gClient.m_pakiet["kropka"][kropencja]["width"].asInt();
+				rect.height = pakiecik["kropka"][kropencja]["height"].asInt();
+				rect.left = pakiecik["kropka"][kropencja]["left"].asInt();
+				rect.top = pakiecik["kropka"][kropencja]["top"].asInt();
+				rect.width = pakiecik["kropka"][kropencja]["width"].asInt();
 
 				//dopalacz
 				sf::FloatRect rect2;
-				rect2.height = gClient.m_pakiet["dopalacz"]["height"].asInt();
-				rect2.left = gClient.m_pakiet["dopalacz"]["left"].asInt();
-				rect2.top = gClient.m_pakiet["dopalacz"]["top"].asInt();
-				rect2.width = gClient.m_pakiet["dopalacz"]["width"].asInt();
+				rect2.height = pakiecik["dopalacz"]["height"].asInt();
+				rect2.left = pakiecik["dopalacz"]["left"].asInt();
+				rect2.top = pakiecik["dopalacz"]["top"].asInt();
+				rect2.width = pakiecik["dopalacz"]["width"].asInt();
 
-				bool act = gClient.m_pakiet["dopalacz"].get("activate", false).asBool();
+				bool act = pakiecik["dopalacz"].get("activate", false).asBool();
 
 				if (act)
 				{
@@ -452,11 +510,11 @@ int CGame::updateMultiplayerStuff()
 				std::string e = "0";
 				for (unsigned int i = 0; i < m_Enemies.size(); i++)
 				{
-					p.x = gClient.m_pakiet["enemies"][e]["pos"].get("x", m_Enemies[i].getPosition().x).asFloat();
-					p.y = gClient.m_pakiet["enemies"][e]["pos"].get("y", m_Enemies[i].getPosition().y).asFloat();
-					k.x = gClient.m_pakiet["enemies"][e]["dir"].get("x", m_Enemies[i].getDirection().x).asFloat();
-					k.y = gClient.m_pakiet["enemies"][e]["dir"].get("y", m_Enemies[i].getDirection().y).asFloat();
-					kier = gClient.m_pakiet["enemies"][e].get("kierunek", m_Enemies[i].getKierunek()).asInt();
+					p.x = pakiecik["enemies"][e]["pos"].get("x", m_Enemies[i].getPosition().x).asFloat();
+					p.y = pakiecik["enemies"][e]["pos"].get("y", m_Enemies[i].getPosition().y).asFloat();
+					k.x = pakiecik["enemies"][e]["dir"].get("x", m_Enemies[i].getDirection().x).asFloat();
+					k.y = pakiecik["enemies"][e]["dir"].get("y", m_Enemies[i].getDirection().y).asFloat();
+					kier = pakiecik["enemies"][e].get("kierunek", m_Enemies[i].getKierunek()).asInt();
 					
 					m_Enemies[i].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
@@ -464,7 +522,7 @@ int CGame::updateMultiplayerStuff()
 				}
 
 				//aktualizacja wyniku
-				m_Score = gClient.m_pakiet["wynik"].asFloat();
+				m_Score = pakiecik["wynik"].asFloat();
 			}
 		}
 	}
@@ -812,7 +870,7 @@ void CGame::PrepareGame(sf::RenderWindow & App)
 
 int CGame::calculateID(int _ID)
 {
-	int newID = -1;
+	/*int newID = -1;
 	switch (gClient.getClientID())
 	{
 		case 1:
@@ -823,6 +881,7 @@ int CGame::calculateID(int _ID)
 				newID = 1;
 			else if (_ID == 4)
 				newID = 2;
+			//newID = (gClient.getClientID() + _ID) % 3;
 			break;
 		}
 
@@ -860,5 +919,16 @@ int CGame::calculateID(int _ID)
 		}
 	}
 
+	return newID;*/
+
+	//Czary mary: Reducto! Standardowa ksiêga zaklêæ optymalizacyjnych
+	int newID = -1;
+	int gcID = gClient.getClientID();
+	if (gcID >= 1 && gcID <= 4)     //warunek spe³nialnoœci switcha
+	{
+		newID = (gcID < _ID) ? _ID - 2 : _ID - 1;       //zredukowane dzia³anie switcha
+	}
+
 	return newID;
+
 }

@@ -216,9 +216,9 @@ void CClient::sendPacketPos()
 	pakietPos["typ"] = Typ::POS;
 	pakietPos["id"] = m_clientID;
 
-	odebrane = m_writer.write(pakietPos);
+	std::string nodebrane = m_writer.write(pakietPos);
 
-	if (socket.send(odebrane.c_str(), odebrane.length(), *serverIP, serverPort) != Socket::Done)
+	if (socket.send(nodebrane.c_str(), nodebrane.length(), *serverIP, serverPort) != Socket::Done)
 	{
 		std::cout << "PacketPos cannot be send to server\n";
 	}

@@ -19,6 +19,7 @@ using namespace std;
 #include <functional>
 #include <Windows.h>
 #include <assert.h>
+#include <thread>
 
 // Sieciowe
 #include <UDP_Socket.h>
@@ -38,4 +39,5 @@ using namespace std;
 #include "CLobby.h"
 #include "CClient.h"
 #include "COtherPlayer.h"
+#include "ConcurrentQueue.hpp"
 #endif

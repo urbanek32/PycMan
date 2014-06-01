@@ -14,6 +14,7 @@ CLobby::CLobby()
 
 
 	ifstream plik("DATA/server_ip.txt");
+	//std::string ip = "62.61.60.7";
 	std::string ip = "127.0.0.1";
 	if (plik.is_open())
 	{
