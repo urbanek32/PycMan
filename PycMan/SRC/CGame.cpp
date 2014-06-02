@@ -83,7 +83,7 @@ CGame::CGame()
 int CGame::Run(sf::RenderWindow & App)
 {
 	m_Running = true;
-
+	
 	//tutaj wstawiæ nowy w¹tek pingowania serwera
 	//...........................................
 	while( m_Running )
@@ -103,8 +103,11 @@ int CGame::Run(sf::RenderWindow & App)
 		}
 #pragma endregion
 		
-		if( !m_Inited )
+		if (!m_Inited)
+		{
 			m_Init();
+			RestartGame();
+		}		
 
 
 		//m_mutex.lock();
@@ -241,12 +244,11 @@ int CGame::Run(sf::RenderWindow & App)
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
 				{
 					// wróæ do menu
-					m_mutex.lock();
-					restarted = true;
-					m_mutex.unlock();
-					//receiverThread->terminate();
+					receiverThread->terminate();
+					cout << "watek przerwany" << endl;
+					m_Inited = false;
 					gClient.leaveServer();					
-					RestartGame(true);
+					//RestartGame(true);
 					//m_Inited = false;
 					return (0);
 
@@ -397,29 +399,22 @@ void CGame::m_Init()
 
 	receiverThread = new sf::Thread(&CGame::receivePackageInNewThread, this);
 	receiverThread->launch();
-
+	cout << "watek uruchomiony" << endl;
 	m_startclock.restart();
 }
 
 void CGame::receivePackageInNewThread()
 {
 	gClient.socket.setBlocking(true);
-	bool warunek;
-
-	m_mutex.lock();
-	warunek = restarted;
-	m_mutex.unlock();
-
-	while (!warunek)
+	
+	while (!restarted)
 	{
 		gClient.receiveMessageToVariable();
 		if (gClient.typeOfReceivedMessage() == Typ::POS)
 		{
 			packageQueue.push(gClient.m_pakiet);
 		}
-		m_mutex.lock();
-		warunek = restarted;
-		m_mutex.unlock();
+		
 	}
 	gClient.socket.setBlocking(false);
 }
@@ -429,12 +424,11 @@ int CGame::updateMultiplayerStuff()
 {	
 	if (gClient.typeOfReceivedMessage() == Typ::STOP)
 	{
-		m_mutex.lock();
-		restarted = true;
-		m_mutex.unlock();
-		//receiverThread->terminate();
+		receiverThread->terminate();
+		cout << "watek wylaczony" << endl;
+		m_Inited = false;
 		gClient.leaveServer();
-		RestartGame(true);
+		//RestartGame(true);
 		return 0;
 	}
 
