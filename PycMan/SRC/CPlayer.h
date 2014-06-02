@@ -37,6 +37,8 @@ public:
 
 	void SetStartPosition(sf::Vector2f & Position);
 
+	void sendPositionChange(sf::Vector2f newPos, int newDir);
+
 private:
 	sf::Sprite m_Sprite;
 	sf::Texture m_Texture;
@@ -48,8 +50,6 @@ private:
 	kierunek m_kierunek, m_NowyKierunek;
 
 	bool m_CanGo;
-
-	void sendPositionChange(sf::Vector2f newPos, int newDir);
 
 	bool CanTurn(sf::Image& ScreenCapture);
 

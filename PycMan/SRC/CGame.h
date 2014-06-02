@@ -64,7 +64,7 @@ private:
 
 	void CheckCollision(CMapManager *maper, CPlayer *player);
 
-	void RestartPositions();
+	void RestartPositions(bool resetPlayers = true);
 
 	void OtherUpdates(sf::RenderWindow & App);
 

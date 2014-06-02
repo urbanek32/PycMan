@@ -109,15 +109,6 @@ int CGame::Run(sf::RenderWindow & App)
 			RestartGame();
 		}		
 
-
-		//m_mutex.lock();
-		/*if (restarted)
-		{
-			receiverThread->launch();
-			restarted = false;
-		}*/
-		//m_mutex.lock();
-
 		//ile pakietów na klatkê
 		for (int i = 0; i < 3; i++)
 		{
@@ -350,6 +341,8 @@ void CGame::m_Init()
 	m_TGameOver.setString("Game Over\nZakoñczyæ grê?\nT / N");
 	m_TQuit.setString("Quit?\nT / N");
 
+	m_OtherPlayers.clear();
+
 	//tworzê nowych graczy
 	COtherPlayer *subPlayer1 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color::Red);
 	m_OtherPlayers.push_back(*subPlayer1);
@@ -357,6 +350,9 @@ void CGame::m_Init()
 	m_OtherPlayers.push_back(*subPlayer2);
 	COtherPlayer *subPlayer3 = new COtherPlayer("DATA/pacmanALL.bmp", otherPlayersStartPositions[0], sf::Color(255,150,0), false);
 	m_OtherPlayers.push_back(*subPlayer3);
+
+
+	m_Enemies.clear();
 
 	//duchy
 	CEnemyGhost *duch = new CEnemyGhost("DATA/BlinkyALL.bmp", enemyStartPositions[0]);
@@ -399,7 +395,7 @@ void CGame::m_Init()
 
 	receiverThread = new sf::Thread(&CGame::receivePackageInNewThread, this);
 	receiverThread->launch();
-	cout << "watek uruchomiony" << endl;
+
 	m_startclock.restart();
 }
 
@@ -425,7 +421,6 @@ int CGame::updateMultiplayerStuff()
 	if (gClient.typeOfReceivedMessage() == Typ::STOP)
 	{
 		receiverThread->terminate();
-		cout << "watek wylaczony" << endl;
 		m_Inited = false;
 		gClient.leaveServer();
 		//RestartGame(true);
@@ -658,7 +653,7 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 	m_TScore.setString(buf.str());
 
 	// Kolizja pacmana z duszkami
-	/*for(vector<class CEnemyGhost>::iterator it = m_Enemies.begin(); it != m_Enemies.end(); it++)
+	for(vector<class CEnemyGhost>::iterator it = m_Enemies.begin(); it != m_Enemies.end(); it++)
 	{
 		sf::FloatRect rect = it->GetSprite().getGlobalBounds();
 
@@ -672,18 +667,19 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 			}
 			else
 			{
-				m_Lives--;
-				RestartPositions();
+				//m_Lives--;			
+				RestartPositions(false);
+				player->sendPositionChange(player->GetPlayerPosition(), kierunek::LEWO);
 			}
 			
 		}
 	}
 	std::ostringstream buf2;
 	buf2<<"Zycia: "<<m_Lives;
-	m_TLives.setString(buf2.str());*/
+	m_TLives.setString(buf2.str());
 }
 
-void CGame::RestartPositions()
+void CGame::RestartPositions(bool _resetPlayers)
 {
 	m_Player->RestartPosition();
 	
@@ -692,9 +688,12 @@ void CGame::RestartPositions()
 		m_Enemies[i].ResetPosition();
 	}
 
-	for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
+	if (_resetPlayers)
 	{
-		m_OtherPlayers[i].ResetPosition();
+		for (unsigned int i = 0; i < m_OtherPlayers.size(); i++)
+		{
+			m_OtherPlayers[i].ResetPosition();
+		}
 	}
 	
 }

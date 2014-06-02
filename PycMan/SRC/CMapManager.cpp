@@ -39,6 +39,8 @@ void CMapManager::LoadMap(const string filepath)
 	m_Foods.clear();
 	m_Walls.clear();
 	m_renderTextureWalls.clear();
+	otherPlayersStartPositions.clear();
+	enemyStartPositions.clear();
 
 
 	ifstream plik(filepath.c_str());
