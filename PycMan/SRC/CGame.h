@@ -89,5 +89,9 @@ private:
 
 	// czy okno z gra jest aktywne
 	bool m_isActive;
+	
+	bool m_drawSpecial;
+
+	sfe::Movie *m_special;
 };
 #endif

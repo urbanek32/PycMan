@@ -7,6 +7,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
 #include <json/json.h>
+#include <sfeMovie/Movie.hpp>
 
 // Standartowe
 using namespace std;

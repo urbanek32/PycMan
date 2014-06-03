@@ -52,15 +52,15 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\jsoncpp-lib\include;..\SFML 2.1 [static] [vs2013]\include;..\moje_Socket [static] [vs2013]\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\sfeMovie\include;..\jsoncpp-lib\include;..\SFML 2.1 [static] [vs2013]\include;..\moje_Socket [static] [vs2013]\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\jsoncpp-lib\lib\;..\SFML 2.1 [static] [vs2013]\lib_dyn;..\moje_Socket [static] [vs2013]\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-main-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;moje_Socket-d.lib;jsoncpp-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\sfeMovie\lib;..\jsoncpp-lib\lib\;..\SFML 2.1 [static] [vs2013]\lib_dyn;..\moje_Socket [static] [vs2013]\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-main-d.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;moje_Socket-d.lib;jsoncpp-d.lib;sfeMovie.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -72,7 +72,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\jsoncpp-lib\include;..\SFML 2.1 [static] [vs2013]\include;..\moje_Socket [static] [vs2013]\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\sfeMovie\include;..\jsoncpp-lib\include;..\SFML 2.1 [static] [vs2013]\include;..\moje_Socket [static] [vs2013]\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -80,8 +80,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>..\jsoncpp-lib\lib\;..\moje_Socket [static] [vs2013]\lib;..\SFML 2.1 [static] [vs2013]\lib_dyn;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>sfml-main.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;moje_Socket.lib;jsoncpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\sfeMovie\lib;..\jsoncpp-lib\lib\;..\moje_Socket [static] [vs2013]\lib;..\SFML 2.1 [static] [vs2013]\lib_dyn;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-main.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;moje_Socket.lib;jsoncpp.lib;sfeMovie.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

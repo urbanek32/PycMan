@@ -15,6 +15,7 @@ CGame::CGame()
 	m_currentTime = 0;
 	m_count = 5;
 	restarted = true;
+	m_drawSpecial = false;
 
 	gameState = Prepare;
 
@@ -207,6 +208,25 @@ int CGame::Run(sf::RenderWindow & App)
 					gameState = Play;
 			}*/
 
+			if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::Multiply)
+			{
+				if (gClient.isMasterClient())
+				{
+					if (m_drawSpecial)
+					{
+						m_drawSpecial = false;
+						gClient.pakietPos["drawSpecial"] = 0;
+						m_special->stop();
+					}
+					else if (!m_drawSpecial)
+					{
+						m_drawSpecial = true;
+						gClient.pakietPos["drawSpecial"] = 1;
+						m_special->play();
+					}
+				}
+			}
+
 			if (gameState == GameOver)
 			{
 				if (m_Event.type == sf::Event::KeyPressed && m_Event.key.code == sf::Keyboard::T)
@@ -312,6 +332,12 @@ int CGame::Run(sf::RenderWindow & App)
 
 		if(gameState == Quit)
 			ShowQuit(App);
+
+		//rysowanie naszego speciala :p
+		if (m_drawSpecial)
+		{
+			App.draw(*m_special);
+		}
 		
 		App.display();
 		//sf::sleep(0.01f);
@@ -396,6 +422,14 @@ void CGame::m_Init()
 	receiverThread->launch();
 
 	m_startclock.restart();
+
+	
+	m_special = new sfe::Movie();
+	if (!m_special->openFromFile("DATA/special.ogg")) 
+	{
+		std::cout << "[ERROR] special.ogg nie zaladowany\n";
+	}
+	m_special->resizeToFrame(0, 0, 800, 600);
 }
 
 void CGame::receivePackageInNewThread()
@@ -544,6 +578,20 @@ int CGame::updateMultiplayerStuff()
 				{
 					RestartPositions(false, false);
 				}
+			}
+
+			//sprawdzenie czy rysujemy speciala
+			int spec = pakiecik.get("drawSpecial", -1).asInt();
+
+			if (spec == 1)
+			{
+				m_drawSpecial = true;
+				m_special->play();
+			}
+			else if (spec == 0)
+			{
+				m_drawSpecial = false;
+				m_special->stop();
 			}
 		}
 	}
