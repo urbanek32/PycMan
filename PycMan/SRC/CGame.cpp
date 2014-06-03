@@ -144,6 +144,7 @@ int CGame::Run(sf::RenderWindow & App)
 			if (m_Event.type == sf::Event::Closed)
 			{
 				// Zamknij aplikacje
+				receiverThread->terminate();
 				gClient.leaveServer();
 				m_Running = false;
 				return (-1);
