@@ -237,11 +237,9 @@ int CGame::Run(sf::RenderWindow & App)
 				{
 					// wróæ do menu
 					receiverThread->terminate();
-					cout << "watek przerwany" << endl;
+					//cout << "watek przerwany" << endl;
 					m_Inited = false;
 					gClient.leaveServer();					
-					//RestartGame(true);
-					//m_Inited = false;
 					return (0);
 
 				}
@@ -391,7 +389,7 @@ void CGame::m_Init()
 	m_overShape.setOutlineColor(sf::Color(139,134,78,255));
 
 	m_overtp.setSize(sf::Vector2f(150,50));
-	m_overtp.setPosition(410,200);
+	m_overtp.setPosition(410,270);
 	m_overtp.setFillColor(sf::Color(0,0,0,255));
 
 	receiverThread = new sf::Thread(&CGame::receivePackageInNewThread, this);
@@ -514,6 +512,8 @@ int CGame::updateMultiplayerStuff()
 				std::string e = "0";
 				for (unsigned int i = 0; i < m_Enemies.size(); i++)
 				{
+					_itoa(i, const_cast<char*>(e.c_str()), 10);
+
 					p.x = pakiecik["enemies"][e]["pos"].get("x", m_Enemies[i].getPosition().x).asFloat();
 					p.y = pakiecik["enemies"][e]["pos"].get("y", m_Enemies[i].getPosition().y).asFloat();
 					k.x = pakiecik["enemies"][e]["dir"].get("x", m_Enemies[i].getDirection().x).asFloat();
@@ -522,11 +522,28 @@ int CGame::updateMultiplayerStuff()
 					
 					m_Enemies[i].setRemotePosition(p, k, static_cast<kierunek>(kier));
 
-					_itoa(i, const_cast<char*>(e.c_str()), 10);
+					
 				}
 
 				//aktualizacja wyniku
 				m_Score = pakiecik.get("wynik", m_Score).asFloat();
+			}
+
+
+			//jako master sprawdzamy czy jakiœ klient nie zjad³ ducha
+			if (gClient.isMasterClient())
+			{
+				int _n = pakiecik.get("eatenNumber", 0).asInt();
+				for (unsigned int i = 0; i < pakiecik["eaten"].size(); i++)
+				{
+					m_Enemies[pakiecik["eaten"][i].asInt()].ResetPosition();
+				}
+
+				//czy master ma zresetowaæ pozycje duchów
+				if (pakiecik.get("resetGhosts", false).asBool())
+				{
+					RestartPositions(false, false);
+				}
 			}
 		}
 	}
@@ -556,6 +573,7 @@ void CGame::UpdateEnemies(sf::RenderWindow & App, sf::Image& ScreenCapture, floa
 
 	for (unsigned int i = 0; i < m_Enemies.size(); i++)
 	{
+		_itoa(i, const_cast<char*>(e.c_str()), 10);
 		m_Enemies[i].Update(App,ScreenCapture, deltaTime, gClient.isMasterClient());
 
 		if (gClient.isMasterClient())
@@ -567,7 +585,7 @@ void CGame::UpdateEnemies(sf::RenderWindow & App, sf::Image& ScreenCapture, floa
 			gClient.pakietPos["enemies"][e]["kierunek"] = m_Enemies[i].getKierunek();
 		}
 
-		_itoa(i, const_cast<char*>(e.c_str()), 10);
+		
 	}
 }
 
@@ -653,10 +671,15 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 	buf<<"Wynik: "<<m_Score;
 	m_TScore.setString(buf.str());
 
+
+/*###########################################################################################################*/
 	// Kolizja pacmana z duszkami
+	int _iloscKolizji = 0, _i = 0;
+	std::string _n = "0";
 	for(vector<class CEnemyGhost>::iterator it = m_Enemies.begin(); it != m_Enemies.end(); it++)
 	{
 		sf::FloatRect rect = it->GetSprite().getGlobalBounds();
+		_itoa(_i, const_cast<char*>(_n.c_str()), 10);
 
 		if(player->GetSprite().getGlobalBounds().intersects(rect))
 		{
@@ -665,24 +688,37 @@ void CGame::CheckCollision(CMapManager *maper, CPlayer *player)
 				it->ResetPosition();
 				m_Score+= 200 * pow(2, float(player->GetEatenGhosts()));
 				player->GetEatenGhosts()++;
+
+
+				//tylko klient wysy³a ¿e zjad³ ducha
+				if (!gClient.isMasterClient())
+				{
+					_iloscKolizji++;
+					gClient.pakietPos["eaten"].append(Json::Value(_i));
+				}
 			}
 			else
 			{
 				//m_Lives--;			
 				RestartPositions(false);
 				player->sendPositionChange(player->GetPlayerPosition(), kierunek::LEWO);
+				gClient.pakietPos["resetGhosts"] = true;
 			}
 			
 		}
+		_i++;
 	}
+	gClient.pakietPos["eatenNumber"] = _iloscKolizji;
+
 	std::ostringstream buf2;
 	buf2<<"Zycia: "<<m_Lives;
 	m_TLives.setString(buf2.str());
 }
 
-void CGame::RestartPositions(bool _resetPlayers)
+void CGame::RestartPositions(bool _resetPlayers, bool _resetPlayer)
 {
-	m_Player->RestartPosition();
+	if (_resetPlayer)
+		m_Player->RestartPosition();
 	
 	for (unsigned int i = 0; i < m_Enemies.size(); i++)
 	{

@@ -48,7 +48,7 @@ void CPlayer::Update(sf::RenderWindow & App, sf::Image & ScreenCapture, float de
 			else { m_Speed = 60.f; }
 		}		
 
-		if(m_regenclock.getElapsedTime().asSeconds() > 1.f)
+		if(m_regenclock.getElapsedTime().asSeconds() > 0.5f)
 		{
 			if(m_Stamina < 100.f)
 				m_Stamina+=1.f;
